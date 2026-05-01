@@ -400,4 +400,261 @@ function initSocket() {
   socket = io();
 
   socket.on('connect', () => {
-    setConnStatu
+    setConnStatus(true);
+    console.log('Socket connected:', socket.id);
+  });
+
+  socket.on('disconnect', () => {
+    setConnStatus(false);
+    if (isConnected) {
+      addSys('⚠️ Server se connection toot gaya — refresh karo');
+    }
+  });
+
+  socket.on('waiting', ({ position }) => {
+    document.getElementById('waitBadge').textContent = `⏳ Queue mein ho — ${position} log wait kar rahe hain`;
+  });
+
+  socket.on('matched', ({ partnerNick, partnerGender, roomId, sharedKey: key }) => {
+    // Agar user ne cancel kar diya toh match ignore karo
+    if (!isSearching) {
+      socket.emit('cancelSearch'); // server ko bhi batao
+      return;
+    }
+    isSearching = false;
+    sharedKey = key;
+    isConnected = true;
+
+    const genderEmoji = {male:'♂️',female:'♀️',other:'⚧️'};
+    const genderIcon  = {male:'♂',female:'♀',other:'⚧'};
+    const genderLabel = {male:'Male • Online',female:'Female • Online',other:'Other • Online'};
+
+    document.getElementById('avatarWrap').className = 'avatar-wrap ' + partnerGender;
+    document.getElementById('partnerAvatar').textContent = genderEmoji[partnerGender] || '👤';
+    document.getElementById('genderBadge').textContent = genderIcon[partnerGender] || '?';
+    document.getElementById('partnerName').textContent = partnerNick;
+    document.getElementById('partnerGenderLabel').textContent = genderLabel[partnerGender] || 'Online';
+
+    clearMsgs();
+    document.getElementById('discBar').classList.remove('show');
+    document.getElementById('msgInput').disabled = false;
+
+    showScreen('chatScreen');
+    addSys('✅ ' + partnerNick + ' (' + (genderEmoji[partnerGender]||'') + ') se connect hua!');
+    addSys('🔒 Messages encrypted hain — koi data save nahi hota');
+    addSys('⚠️ Personal info share mat karo!');
+  });
+
+  socket.on('receiveMessage', ({ text, senderNick, timestamp }) => {
+    hideTyping();
+    const decrypted = sharedKey ? xorDecrypt(text, sharedKey) : text;
+    addMsg(decrypted, 'other', senderNick, timestamp);
+  });
+
+  socket.on('receiveImage', ({ imageData, senderNick, timestamp }) => {
+    hideTyping();
+    addImgMsg(imageData, 'other', senderNick, timestamp);
+  });
+
+  socket.on('partnerTyping', (isTyping) => {
+    isTyping ? showTyping() : hideTyping();
+  });
+
+  socket.on('partnerLeft', () => {
+    isConnected = false;
+    sharedKey = '';
+    hideTyping();
+    document.getElementById('discBar').classList.add('show');
+    document.getElementById('msgInput').disabled = true;
+    addSys('👋 Stranger ne chat chhod di — koi data save nahi hua');
+  });
+}
+
+function setConnStatus(online) {
+  const el = document.getElementById('connStatus');
+  const label = document.getElementById('connLabel');
+  el.className = 'conn-status ' + (online ? 'online' : 'offline');
+  label.textContent = online ? 'Connected' : 'Offline';
+}
+
+// ══════════════════════════════════
+//   UI HELPERS
+// ══════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+
+function selectGender(g, el) {
+  document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  myGender = g;
+}
+
+function selectPref(p, el) {
+  document.querySelectorAll('.pref-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  prefGender = p;
+}
+
+function startSearch() {
+  if (!myGender) { alert('Pehle apna gender select karo!'); return; }
+  if (!socket || !socket.connected) { alert('Server se connect nahi hai! Page refresh karo.'); return; }
+
+  myNick = document.getElementById('nickInput').value.trim() || 'Anonymous';
+  const labels = {male:'♂️ Male ke saath',female:'♀️ Female ke saath',other:'⚧️ Other ke saath',any:'🎲 Anyone ke saath'};
+  document.getElementById('waitBadge').textContent = labels[prefGender] || '🎲 Anyone';
+
+  showScreen('waitScreen');
+  isSearching = true;   // ← search shuru
+  socket.emit('findPartner', { nick: myNick, gender: myGender, pref: prefGender });
+}
+
+function cancelSearch() {
+  isSearching = false;   // ← search band
+  socket.emit('cancelSearch');
+  showScreen('onboardScreen');
+}
+
+function skipPartner() {
+  isConnected = false;
+  sharedKey = '';
+  clearMsgs();
+  showScreen('waitScreen');
+  isSearching = true;   // ← naya search shuru
+  socket.emit('skip');
+}
+
+function leaveChat() {
+  isConnected = false;
+  sharedKey = '';
+  hideTyping();
+  document.getElementById('discBar').classList.add('show');
+  document.getElementById('msgInput').disabled = true;
+  addSys('👋 Tumne chat chhod di — koi data save nahi hua');
+  socket.emit('skip'); // notify server
+}
+
+// ══════════════════════════════════
+//   MESSAGES
+// ══════════════════════════════════
+function addSys(text) {
+  const msgs = document.getElementById('msgs');
+  const trow = document.getElementById('typingRow');
+  const d = document.createElement('div');
+  d.className = 'sys-msg'; d.textContent = text;
+  msgs.insertBefore(d, trow);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addMsg(text, type, nick, ts) {
+  const msgs = document.getElementById('msgs');
+  const trow = document.getElementById('typingRow');
+  const time = ts ? new Date(ts) : new Date();
+  const timeStr = time.getHours().toString().padStart(2,'0')+':'+time.getMinutes().toString().padStart(2,'0');
+  const name = type === 'self' ? myNick : (nick || 'Stranger');
+  const d = document.createElement('div');
+  d.className = 'message ' + type;
+  d.innerHTML = `<div class="msg-bubble">${escHtml(text)}</div>
+    <div class="msg-meta"><span>${name} • ${timeStr}</span><span class="enc-tag">🔒 encrypted</span></div>`;
+  msgs.insertBefore(d, trow);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addImgMsg(src, type, nick, ts) {
+  const msgs = document.getElementById('msgs');
+  const trow = document.getElementById('typingRow');
+  const time = ts ? new Date(ts) : new Date();
+  const timeStr = time.getHours().toString().padStart(2,'0')+':'+time.getMinutes().toString().padStart(2,'0');
+  const name = type === 'self' ? myNick : (nick || 'Stranger');
+  const d = document.createElement('div');
+  d.className = 'message ' + type;
+  d.innerHTML = `<div class="msg-bubble" style="padding:6px;">
+      <img class="msg-img" src="${src}" onclick="openLightbox('${src}')" alt="image"/></div>
+    <div class="msg-meta"><span>${name} • ${timeStr}</span><span class="enc-tag">🔒 encrypted</span></div>`;
+  msgs.insertBefore(d, trow);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function clearMsgs() {
+  const msgs = document.getElementById('msgs');
+  const t = document.getElementById('typingRow');
+  msgs.innerHTML = ''; msgs.appendChild(t);
+}
+
+function escHtml(t) {
+  const d = document.createElement('div');
+  d.appendChild(document.createTextNode(t));
+  return d.innerHTML;
+}
+
+// ══════════════════════════════════
+//   SEND
+// ══════════════════════════════════
+function sendMsg() {
+  if (!isConnected || !socket) return;
+  const inp = document.getElementById('msgInput');
+  const txt = inp.value.trim();
+  if (!txt) return;
+
+  const encrypted = sharedKey ? xorEncrypt(txt, sharedKey) : txt;
+  socket.emit('sendMessage', { text: txt, encryptedText: encrypted });
+  addMsg(txt, 'self', myNick);
+  inp.value = ''; inp.style.height = 'auto';
+  socket.emit('typing', false);
+}
+
+function sendImage(e) {
+  if (!isConnected || !socket) return;
+  const file = e.target.files[0];
+  if (!file || !file.type.startsWith('image/')) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    socket.emit('sendImage', { imageData: ev.target.result });
+    addImgMsg(ev.target.result, 'self', myNick);
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+function onTyping() {
+  if (!isConnected || !socket) return;
+  socket.emit('typing', true);
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(() => socket.emit('typing', false), 2000);
+}
+
+function showTyping() {
+  document.getElementById('typingRow').classList.add('show');
+  document.getElementById('msgs').scrollTop = 9999;
+}
+function hideTyping() { document.getElementById('typingRow').classList.remove('show'); }
+
+// ══════════════════════════════════
+//   LIGHTBOX
+// ══════════════════════════════════
+function openLightbox(src) {
+  document.getElementById('lbImg').src = src;
+  document.getElementById('lightbox').classList.add('show');
+}
+function closeLightbox() { document.getElementById('lightbox').classList.remove('show'); }
+
+// ══════════════════════════════════
+//   INIT
+// ══════════════════════════════════
+document.getElementById('nickInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startSearch();
+});
+initSocket();
+</script>
+</body>
+</html>
