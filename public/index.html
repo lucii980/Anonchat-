@@ -1,4 +1,4 @@
-   <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -16,14 +16,25 @@
   --text:#dde4f0;--muted:#5a6480;--muted2:#8899bb;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);
-  height:100vh;overflow:hidden;display:flex;flex-direction:column;position:relative;}
+
+/* Mobile-safe full height — 100dvh works on modern mobile browsers */
+html,body{
+  font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);
+  width:100%;height:100%;
+  /* fallback for older browsers */
+  height:100vh;
+  /* modern mobile — excludes browser chrome */
+  height:100dvh;
+  overflow:hidden;
+  position:fixed; /* prevents iOS safari bounce scroll */
+  top:0;left:0;right:0;bottom:0;
+}
 body::before{content:'';position:fixed;inset:0;
   background:radial-gradient(ellipse 70% 50% at 15% 10%,rgba(79,158,255,.06) 0%,transparent 60%),
     radial-gradient(ellipse 60% 60% at 85% 90%,rgba(167,139,250,.06) 0%,transparent 60%);
   pointer-events:none;z-index:0;}
 
-/* SCREENS */
+/* SCREENS — non-chat screens use absolute, chat uses fixed layout */
 .screen{position:absolute;inset:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;z-index:1;
   transition:opacity .35s ease,transform .35s ease;overflow-y:auto;padding:16px;}
@@ -112,10 +123,26 @@ body::before{content:'';position:fixed;inset:0;
   cursor:pointer;transition:border-color .2s,color .2s;}
 .btn-cancel:hover{border-color:var(--red);color:var(--red);}
 
-/* CHAT */
-#chatScreen{justify-content:flex-start;padding:0;align-items:stretch;overflow:hidden;}
-.chat-header{background:var(--card);border-bottom:1px solid var(--border);
-  padding:12px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;z-index:2;}
+/* CHAT — completely fixed layout, immune to mobile keyboard/scroll */
+#chatScreen{
+  position:fixed;
+  inset:0;
+  padding:0;
+  align-items:stretch;
+  justify-content:flex-start;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+#chatScreen.hidden{display:none;opacity:0;pointer-events:none;}
+
+.chat-header{
+  background:var(--card);border-bottom:1px solid var(--border);
+  padding:12px 16px;display:flex;align-items:center;gap:12px;
+  flex-shrink:0;z-index:2;
+  /* fixed at top */
+  position:sticky;top:0;
+}
 .avatar-wrap{position:relative;flex-shrink:0;}
 .partner-avatar{width:40px;height:40px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;font-size:20px;
@@ -146,9 +173,16 @@ body::before{content:'';position:fixed;inset:0;
 .hbtn:hover{background:rgba(255,77,106,.1);border-color:var(--red);color:var(--red);}
 .hbtn.new:hover{background:rgba(79,158,255,.1);border-color:var(--accent);color:var(--accent);}
 
-/* MESSAGES */
-.msgs{flex:1;min-height:0;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;
-  scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+/* MESSAGES — fills remaining space, scrolls internally */
+.msgs{
+  flex:1;
+  min-height:0;        /* critical for flex scroll */
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch; /* smooth scroll on iOS */
+  padding:16px;
+  display:flex;flex-direction:column;gap:8px;
+  scrollbar-width:thin;scrollbar-color:var(--border) transparent;
+}
 .msgs::-webkit-scrollbar{width:3px;}
 .msgs::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
 .sys-msg{align-self:center;text-align:center;font-size:11px;color:var(--muted);
@@ -189,16 +223,24 @@ body::before{content:'';position:fixed;inset:0;
 .disc-bar{display:none;background:rgba(255,77,106,.07);
   border-top:1px solid rgba(255,77,106,.2);padding:11px 16px;
   align-items:center;justify-content:center;gap:12px;
-  font-size:13px;color:var(--red);font-family:'Space Mono',monospace;flex-shrink:0;}
+  font-size:13px;color:var(--red);font-family:'Space Mono',monospace;
+  flex-shrink:0;}
 .disc-bar.show{display:flex;}
 .btn-renew{padding:6px 14px;background:rgba(255,77,106,.12);
   border:1px solid rgba(255,77,106,.3);border-radius:8px;color:var(--red);
   font-family:'Syne',sans-serif;font-size:12px;cursor:pointer;transition:background .2s;}
 .btn-renew:hover{background:rgba(255,77,106,.2);}
 
-/* FOOTER */
-.chat-footer{background:var(--card);border-top:1px solid var(--border);
-  padding:12px 14px;display:flex;gap:8px;align-items:flex-end;flex-shrink:0;}
+/* FOOTER — always at bottom, shrinks messages area upward */
+.chat-footer{
+  background:var(--card);
+  border-top:1px solid var(--border);
+  padding:10px 14px;
+  display:flex;gap:8px;align-items:flex-end;
+  flex-shrink:0;
+  /* safe area for phones with home bar */
+  padding-bottom:max(10px, env(safe-area-inset-bottom));
+}
 .icon-btn{width:38px;height:38px;border-radius:10px;background:var(--surface);
   border:1px solid var(--border2);color:var(--muted);cursor:pointer;font-size:17px;
   display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
@@ -355,7 +397,7 @@ body::before{content:'';position:fixed;inset:0;
   <img id="lbImg" src="" alt="image">
 </div>
 
-<script>
+   <script>
 // ══════════════════════════════════
 //   SIMPLE XOR ENCRYPTION (visual E2E simulation)
 //   In production: use WebCrypto AES-GCM with key from server
@@ -481,8 +523,16 @@ function setConnStatus(online) {
 //   UI HELPERS
 // ══════════════════════════════════
 function showScreen(id) {
+  // Pehle sab screens hide karo
   document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
+  // chatScreen ko alag handle karo
+  const chatScreen = document.getElementById('chatScreen');
+  if (id === 'chatScreen') {
+    chatScreen.classList.remove('hidden');
+  } else {
+    chatScreen.classList.add('hidden');
+    document.getElementById(id).classList.remove('hidden');
+  }
 }
 
 function selectGender(g, el) {
