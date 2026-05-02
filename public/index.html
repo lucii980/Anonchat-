@@ -2,284 +2,256 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>AnonChat — Safe & Anonymous</title>
 <script src="/socket.io/socket.io.js"></script>
+
+<!-- Adsterra Social Bar -->
+<script src="https://pl29314364.profitablecpmratenetwork.com/2b/c0/8a/2bc08a101d0d4a1068afd453820f01a5.js"></script>
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
 
-:root {
+:root{
   --bg:#080b12;--surface:#0d1017;--card:#111520;--card2:#151a28;
   --border:#1e2535;--border2:#252d40;
   --accent-m:#4f9eff;--accent-f:#ff6eb4;--accent-a:#a78bfa;
   --accent:#4f9eff;--green:#22d3a0;--red:#ff4d6a;
   --text:#dde4f0;--muted:#5a6480;--muted2:#8899bb;
 }
-*{margin:0;padding:0;box-sizing:border-box;}
 
-/* Mobile-safe full height — 100dvh works on modern mobile browsers */
-html,body{
-  font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);
-  width:100%;height:100%;
-  /* fallback for older browsers */
-  height:100vh;
-  /* modern mobile — excludes browser chrome */
-  height:100dvh;
-  overflow:hidden;
-  position:fixed; /* prevents iOS safari bounce scroll */
-  top:0;left:0;right:0;bottom:0;
-}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;}
 body::before{content:'';position:fixed;inset:0;
   background:radial-gradient(ellipse 70% 50% at 15% 10%,rgba(79,158,255,.06) 0%,transparent 60%),
     radial-gradient(ellipse 60% 60% at 85% 90%,rgba(167,139,250,.06) 0%,transparent 60%);
   pointer-events:none;z-index:0;}
 
-/* SCREENS — non-chat screens use absolute, chat uses fixed layout */
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;z-index:1;
-  transition:opacity .35s ease,transform .35s ease;overflow-y:auto;padding:16px;}
-.screen.hidden{opacity:0;pointer-events:none;transform:scale(.96);}
+/* ══ SCREENS ══ */
+.screen{
+  position:fixed;inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-start;
+  z-index:1;overflow-y:auto;
+  padding:20px 16px 32px;
+  transition:opacity .3s,transform .3s;
+}
+.screen.hidden{opacity:0;pointer-events:none;transform:scale(.97);display:none !important;}
 
-/* ONBOARD */
-#onboardScreen{gap:0;justify-content:flex-start;padding-top:24px;}
-.ob-logo{text-align:center;margin-bottom:18px;animation:fadeUp .5s ease both;}
-.ob-logo-icon{font-size:44px;display:block;margin-bottom:6px;
-  filter:drop-shadow(0 0 16px rgba(79,158,255,.5));animation:float 3s ease-in-out infinite;}
-@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
-.ob-logo-title{font-size:36px;font-weight:800;letter-spacing:-1.5px;
+/* ══ ONBOARD ══ */
+#onboardScreen{justify-content:flex-start;gap:14px;padding-top:20px;}
+.ob-logo{text-align:center;width:100%;}
+.ob-logo-icon{font-size:42px;display:block;margin-bottom:4px;
+  filter:drop-shadow(0 0 14px rgba(79,158,255,.5));animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
+.ob-logo-title{font-size:34px;font-weight:800;letter-spacing:-1px;
   background:linear-gradient(135deg,#4f9eff,#a78bfa,#ff6eb4);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.ob-logo-sub{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;
-  letter-spacing:2.5px;margin-top:4px;}
+.ob-logo-sub{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:2px;margin-top:3px;}
 
-/* SAFETY BANNER */
 .safety-banner{width:100%;max-width:460px;
-  background:rgba(255,77,106,.07);border:1px solid rgba(255,77,106,.25);
-  border-radius:14px;padding:14px 16px;margin-bottom:14px;
-  animation:fadeUp .5s .05s ease both;}
-.safety-title{display:flex;align-items:center;gap:8px;font-size:13px;
-  font-weight:700;color:#ff4d6a;margin-bottom:8px;}
+  background:rgba(255,77,106,.07);border:1px solid rgba(255,77,106,.22);
+  border-radius:14px;padding:12px 14px;}
+.safety-title{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:#ff4d6a;margin-bottom:7px;}
 .safety-rules{list-style:none;display:flex;flex-direction:column;gap:5px;}
-.safety-rules li{display:flex;align-items:flex-start;gap:8px;
-  font-size:11.5px;color:var(--muted2);font-family:'Space Mono',monospace;line-height:1.5;}
+.safety-rules li{display:flex;align-items:flex-start;gap:7px;font-size:11px;color:var(--muted2);
+  font-family:'Space Mono',monospace;line-height:1.45;}
 .safety-rules li::before{content:'⚠';color:#ff4d6a;flex-shrink:0;}
 
-/* SETUP CARD */
-.ob-card{width:100%;max-width:460px;background:var(--card);
-  border:1px solid var(--border2);border-radius:20px;padding:22px;
-  animation:fadeUp .5s .1s ease both;}
-.field-label{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;
-  letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
-.nick-input{width:100%;background:var(--surface);border:1px solid var(--border2);
-  border-radius:11px;padding:12px 14px;color:var(--text);
-  font-family:'Space Mono',monospace;font-size:14px;outline:none;
-  transition:border-color .2s,box-shadow .2s;margin-bottom:16px;}
-.nick-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,158,255,.12);}
-.gender-section,.pref-section{margin-bottom:16px;}
-.gender-grid,.pref-grid{display:grid;gap:8px;}
-.gender-grid{grid-template-columns:repeat(3,1fr);}
-.pref-grid{grid-template-columns:repeat(4,1fr);}
-.gender-btn,.pref-btn{background:var(--surface);border:1.5px solid var(--border2);
-  border-radius:12px;padding:11px 6px;cursor:pointer;
-  display:flex;flex-direction:column;align-items:center;gap:5px;
-  transition:all .2s;color:var(--muted2);font-family:'Syne',sans-serif;
-  font-size:12px;font-weight:600;}
-.gender-btn .g-icon,.pref-btn .p-icon{font-size:20px;}
-.gender-btn:hover,.pref-btn:hover{border-color:var(--border2);color:var(--text);transform:translateY(-2px);}
+.ob-card{width:100%;max-width:460px;background:var(--card);border:1px solid var(--border2);border-radius:18px;padding:20px;}
+.field-label{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;
+  letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px;}
+.nick-input{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:10px;
+  padding:11px 13px;color:var(--text);font-family:'Space Mono',monospace;font-size:14px;outline:none;
+  transition:border-color .2s;margin-bottom:14px;}
+.nick-input:focus{border-color:var(--accent);}
+.gender-section,.pref-section{margin-bottom:14px;}
+.gender-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.pref-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
+.gender-btn,.pref-btn{background:var(--surface);border:1.5px solid var(--border2);border-radius:11px;
+  padding:10px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;
+  color:var(--muted2);font-family:'Syne',sans-serif;font-size:11px;font-weight:600;transition:all .2s;}
+.gender-btn .g-icon,.pref-btn .p-icon{font-size:19px;}
 .gender-btn.male.active{border-color:var(--accent-m);background:rgba(79,158,255,.1);color:var(--accent-m);}
 .gender-btn.female.active{border-color:var(--accent-f);background:rgba(255,110,180,.1);color:var(--accent-f);}
 .gender-btn.other.active{border-color:var(--accent-a);background:rgba(167,139,250,.1);color:var(--accent-a);}
 .pref-btn.active{border-color:var(--green);background:rgba(34,211,160,.08);color:var(--green);}
 .btn-start{width:100%;padding:14px;background:linear-gradient(135deg,#4f9eff,#7c6bff);
-  border:none;border-radius:13px;color:#fff;font-family:'Syne',sans-serif;
-  font-size:15px;font-weight:800;cursor:pointer;letter-spacing:.3px;
-  transition:transform .15s,box-shadow .15s;box-shadow:0 4px 20px rgba(79,158,255,.25);}
-.btn-start:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(79,158,255,.35);}
-.enc-note{display:flex;align-items:center;justify-content:center;gap:8px;
-  font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;
-  margin-top:12px;animation:fadeUp .5s .15s ease both;}
+  border:none;border-radius:12px;color:#fff;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;
+  cursor:pointer;box-shadow:0 4px 18px rgba(79,158,255,.25);}
+.enc-note{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;text-align:center;}
 .enc-note span{color:var(--green);}
 
-/* WAITING */
-#waitScreen{gap:18px;}
-.wait-ring{width:88px;height:88px;border-radius:50%;
-  border:2px solid transparent;border-top-color:var(--accent);
-  border-right-color:rgba(79,158,255,.3);animation:spin 1s linear infinite;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 0 30px rgba(79,158,255,.2);}
+/* ══ WAITING ══ */
+#waitScreen{justify-content:center;gap:16px;}
+.wait-ring{width:86px;height:86px;border-radius:50%;
+  border:2px solid transparent;border-top-color:var(--accent);border-right-color:rgba(79,158,255,.3);
+  animation:spin 1s linear infinite;display:flex;align-items:center;justify-content:center;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.wait-inner{font-size:30px;animation:spin 1s linear infinite reverse;}
-.wait-title{font-size:22px;font-weight:800;}
-.wait-sub{font-size:13px;color:var(--muted);font-family:'Space Mono',monospace;}
-.wait-badge{display:flex;align-items:center;gap:8px;background:var(--card);
-  border:1px solid var(--border2);border-radius:20px;padding:8px 16px;
-  font-size:12px;color:var(--muted2);font-family:'Space Mono',monospace;}
+.wait-inner{font-size:28px;animation:spin 1s linear infinite reverse;}
+.wait-title{font-size:21px;font-weight:800;text-align:center;}
+.wait-sub{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;text-align:center;}
+.wait-badge{background:var(--card);border:1px solid var(--border2);border-radius:20px;
+  padding:7px 15px;font-size:12px;color:var(--muted2);font-family:'Space Mono',monospace;}
 .dots span{animation:blink 1.4s ease-in-out infinite;color:var(--accent);}
-.dots span:nth-child(2){animation-delay:.2s;}
-.dots span:nth-child(3){animation-delay:.4s;}
+.dots span:nth-child(2){animation-delay:.2s;}.dots span:nth-child(3){animation-delay:.4s;}
 @keyframes blink{0%,80%,100%{opacity:.2;}40%{opacity:1;}}
-.btn-cancel{padding:11px 26px;background:transparent;border:1px solid var(--border2);
-  border-radius:10px;color:var(--muted);font-family:'Syne',sans-serif;font-size:13px;
-  cursor:pointer;transition:border-color .2s,color .2s;}
-.btn-cancel:hover{border-color:var(--red);color:var(--red);}
+.btn-cancel{padding:10px 24px;background:transparent;border:1px solid var(--border2);border-radius:10px;
+  color:var(--muted);font-family:'Syne',sans-serif;font-size:13px;cursor:pointer;}
 
-/* CHAT — completely fixed layout, immune to mobile keyboard/scroll */
+/* ══ CHAT SCREEN ══
+   Keyboard-safe: 100dvh shrinks when keyboard opens on Android Chrome
+   Footer stays visible, messages scroll properly
+══ */
 #chatScreen{
   position:fixed;
-  inset:0;
+  top:0;left:0;right:0;bottom:0;
+  height:100vh;
+  height:100dvh; /* shrinks with keyboard on modern browsers */
   padding:0;
   align-items:stretch;
   justify-content:flex-start;
   overflow:hidden;
   display:flex;
   flex-direction:column;
+  z-index:10;
 }
-#chatScreen.hidden{display:none;opacity:0;pointer-events:none;}
+#chatScreen.hidden{display:none !important;}
 
+/* Header — always at top */
 .chat-header{
   background:var(--card);border-bottom:1px solid var(--border);
-  padding:12px 16px;display:flex;align-items:center;gap:12px;
-  flex-shrink:0;z-index:2;
-  /* fixed at top */
-  position:sticky;top:0;
+  padding:11px 14px;display:flex;align-items:center;gap:11px;
+  flex-shrink:0;z-index:2;min-height:60px;
 }
 .avatar-wrap{position:relative;flex-shrink:0;}
-.partner-avatar{width:40px;height:40px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;font-size:20px;
-  border:2px solid transparent;}
+.partner-avatar{width:38px;height:38px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:19px;border:2px solid transparent;}
 .avatar-wrap.male .partner-avatar{background:rgba(79,158,255,.15);border-color:rgba(79,158,255,.3);}
 .avatar-wrap.female .partner-avatar{background:rgba(255,110,180,.15);border-color:rgba(255,110,180,.3);}
 .avatar-wrap.other .partner-avatar{background:rgba(167,139,250,.15);border-color:rgba(167,139,250,.3);}
-.gender-badge{position:absolute;bottom:-3px;right:-3px;width:18px;height:18px;
-  border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:11px;border:2px solid var(--card);}
+.gender-badge{position:absolute;bottom:-2px;right:-2px;width:17px;height:17px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:10px;border:2px solid var(--card);}
 .avatar-wrap.male .gender-badge{background:var(--accent-m);}
 .avatar-wrap.female .gender-badge{background:var(--accent-f);}
 .avatar-wrap.other .gender-badge{background:var(--accent-a);}
-.partner-info{flex:1;}
-.partner-name{font-size:15px;font-weight:700;}
-.partner-meta{display:flex;align-items:center;gap:8px;font-size:11px;
-  color:var(--muted);font-family:'Space Mono',monospace;}
+.partner-info{flex:1;min-width:0;}
+.partner-name{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.partner-meta{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);
+  font-family:'Space Mono',monospace;flex-wrap:wrap;margin-top:2px;}
 .online-dot{width:6px;height:6px;border-radius:50%;background:var(--green);
-  box-shadow:0 0 6px var(--green);animation:pdot 2s ease-in-out infinite;}
+  box-shadow:0 0 5px var(--green);flex-shrink:0;animation:pdot 2s ease-in-out infinite;}
 @keyframes pdot{0%,100%{opacity:1;}50%{opacity:.4;}}
-.enc-badge{display:flex;align-items:center;gap:4px;background:rgba(34,211,160,.08);
-  border:1px solid rgba(34,211,160,.2);border-radius:10px;padding:2px 7px;
-  font-size:10px;color:var(--green);}
-.header-btns{display:flex;gap:6px;}
-.hbtn{width:34px;height:34px;border-radius:8px;background:transparent;
-  border:1px solid var(--border2);color:var(--muted);cursor:pointer;font-size:15px;
-  display:flex;align-items:center;justify-content:center;transition:all .2s;}
-.hbtn:hover{background:rgba(255,77,106,.1);border-color:var(--red);color:var(--red);}
-.hbtn.new:hover{background:rgba(79,158,255,.1);border-color:var(--accent);color:var(--accent);}
+.enc-badge{background:rgba(34,211,160,.08);border:1px solid rgba(34,211,160,.2);
+  border-radius:9px;padding:2px 6px;font-size:9px;color:var(--green);}
+.header-btns{display:flex;gap:6px;flex-shrink:0;}
+.hbtn{width:34px;height:34px;border-radius:8px;background:transparent;border:1px solid var(--border2);
+  color:var(--muted);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;}
 
-/* MESSAGES — fills remaining space, scrolls internally */
+/* Messages — scrollable, fills space between header and footer */
 .msgs{
   flex:1;
-  min-height:0;        /* critical for flex scroll */
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch; /* smooth scroll on iOS */
-  padding:16px;
+  min-height:0;        /* CRITICAL — flex child must have this to scroll */
+  overflow-y:scroll;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  padding:14px 14px 8px;
   display:flex;flex-direction:column;gap:8px;
-  scrollbar-width:thin;scrollbar-color:var(--border) transparent;
 }
-.msgs::-webkit-scrollbar{width:3px;}
-.msgs::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
 .sys-msg{align-self:center;text-align:center;font-size:11px;color:var(--muted);
-  font-family:'Space Mono',monospace;padding:6px 14px;
+  font-family:'Space Mono',monospace;padding:5px 12px;
   background:rgba(255,255,255,.02);border:1px solid var(--border);
-  border-radius:20px;animation:fadeUp .3s ease;max-width:90%;}
-.message{max-width:75%;animation:msgIn .25s ease;}
-@keyframes msgIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  border-radius:18px;max-width:92%;word-break:break-word;}
+.message{max-width:78%;}
 .message.self{align-self:flex-end;}
 .message.other{align-self:flex-start;}
-.msg-bubble{padding:11px 15px;border-radius:18px;font-size:14px;
-  line-height:1.55;word-break:break-word;}
+.msg-bubble{padding:10px 14px;border-radius:17px;font-size:14px;line-height:1.5;word-break:break-word;}
 .message.self .msg-bubble{background:linear-gradient(135deg,rgba(79,158,255,.18),rgba(124,107,255,.12));
-  border:1px solid rgba(79,158,255,.22);border-bottom-right-radius:4px;}
-.message.other .msg-bubble{background:var(--card2);border:1px solid var(--border2);
-  border-bottom-left-radius:4px;}
-.msg-img{max-width:220px;max-height:200px;border-radius:12px;cursor:pointer;
-  display:block;border:1px solid var(--border2);transition:transform .15s;}
-.msg-img:hover{transform:scale(1.02);}
+  border:1px solid rgba(79,158,255,.22);border-bottom-right-radius:3px;}
+.message.other .msg-bubble{background:var(--card2);border:1px solid var(--border2);border-bottom-left-radius:3px;}
+.msg-img{max-width:200px;max-height:180px;border-radius:11px;cursor:pointer;display:block;border:1px solid var(--border2);}
 .msg-meta{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;
-  margin-top:4px;padding:0 3px;display:flex;align-items:center;gap:6px;}
+  margin-top:3px;padding:0 2px;display:flex;align-items:center;gap:5px;}
 .message.self .msg-meta{justify-content:flex-end;}
-.enc-tag{font-size:9px;color:var(--green);display:flex;align-items:center;gap:3px;}
+.enc-tag{font-size:9px;color:var(--green);}
 
-/* TYPING */
-.typing-row{display:none;align-self:flex-start;animation:msgIn .25s ease;}
+/* Typing indicator */
+.typing-row{display:none;align-self:flex-start;}
 .typing-row.show{display:flex;}
 .typing-bubble{background:var(--card2);border:1px solid var(--border2);
-  border-radius:18px;border-bottom-left-radius:4px;
-  padding:12px 16px;display:flex;gap:4px;align-items:center;}
-.t-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);
-  animation:bounce 1.2s ease-in-out infinite;}
-.t-dot:nth-child(2){animation-delay:.2s;}
-.t-dot:nth-child(3){animation-delay:.4s;}
-@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.4;}30%{transform:translateY(-6px);opacity:1;}}
+  border-radius:17px;border-bottom-left-radius:3px;padding:11px 14px;display:flex;gap:4px;align-items:center;}
+.t-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:bounce 1.2s ease-in-out infinite;}
+.t-dot:nth-child(2){animation-delay:.2s;}.t-dot:nth-child(3){animation-delay:.4s;}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.4;}30%{transform:translateY(-5px);opacity:1;}}
 
-/* DISCONNECTED */
-.disc-bar{display:none;background:rgba(255,77,106,.07);
-  border-top:1px solid rgba(255,77,106,.2);padding:11px 16px;
-  align-items:center;justify-content:center;gap:12px;
-  font-size:13px;color:var(--red);font-family:'Space Mono',monospace;
-  flex-shrink:0;}
+/* Disconnected bar */
+.disc-bar{display:none;background:rgba(255,77,106,.07);border-top:1px solid rgba(255,77,106,.2);
+  padding:10px 14px;align-items:center;justify-content:center;gap:10px;
+  font-size:12px;color:var(--red);font-family:'Space Mono',monospace;flex-shrink:0;}
 .disc-bar.show{display:flex;}
-.btn-renew{padding:6px 14px;background:rgba(255,77,106,.12);
-  border:1px solid rgba(255,77,106,.3);border-radius:8px;color:var(--red);
-  font-family:'Syne',sans-serif;font-size:12px;cursor:pointer;transition:background .2s;}
-.btn-renew:hover{background:rgba(255,77,106,.2);}
+.btn-renew{padding:5px 13px;background:rgba(255,77,106,.12);border:1px solid rgba(255,77,106,.3);
+  border-radius:7px;color:var(--red);font-family:'Syne',sans-serif;font-size:12px;cursor:pointer;}
 
-/* FOOTER — always at bottom, shrinks messages area upward */
+/* Footer — always at bottom */
 .chat-footer{
-  background:var(--card);
-  border-top:1px solid var(--border);
-  padding:10px 14px;
-  display:flex;gap:8px;align-items:flex-end;
-  flex-shrink:0;
-  /* safe area for phones with home bar */
+  background:var(--card);border-top:1px solid var(--border);
+  padding:10px 12px;
   padding-bottom:max(10px, env(safe-area-inset-bottom));
+  display:flex;gap:8px;align-items:flex-end;flex-shrink:0;
 }
 .icon-btn{width:38px;height:38px;border-radius:10px;background:var(--surface);
   border:1px solid var(--border2);color:var(--muted);cursor:pointer;font-size:17px;
-  display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
-.icon-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(79,158,255,.08);}
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 #fileInput{display:none;}
-.msg-ta{flex:1;background:var(--surface);border:1px solid var(--border2);
-  border-radius:13px;padding:11px 14px;color:var(--text);
-  font-family:'Syne',sans-serif;font-size:14px;outline:none;resize:none;
-  max-height:80px;line-height:1.4;transition:border-color .2s;overflow-y:auto;}
+.msg-ta{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:12px;
+  padding:10px 13px;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;
+  outline:none;resize:none;max-height:80px;min-height:40px;line-height:1.4;
+  transition:border-color .2s;overflow-y:auto;}
 .msg-ta:focus{border-color:rgba(79,158,255,.4);}
 .msg-ta::placeholder{color:var(--muted);}
-.btn-send{width:42px;height:42px;border-radius:11px;
+.btn-send{width:40px;height:40px;border-radius:11px;flex-shrink:0;
   background:linear-gradient(135deg,#4f9eff,#7c6bff);border:none;color:#fff;
-  font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;
-  transition:transform .15s,box-shadow .15s;flex-shrink:0;
-  box-shadow:0 4px 14px rgba(79,158,255,.2);}
-.btn-send:hover{transform:scale(1.08);box-shadow:0 6px 20px rgba(79,158,255,.35);}
+  font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 
-/* CONNECTION STATUS */
-.conn-status{position:fixed;top:12px;right:12px;z-index:50;
-  font-size:11px;font-family:'Space Mono',monospace;
-  background:var(--card);border:1px solid var(--border2);
-  border-radius:20px;padding:5px 12px;display:flex;align-items:center;gap:6px;
-  transition:all .3s;}
-.conn-dot{width:7px;height:7px;border-radius:50%;}
-.conn-status.online .conn-dot{background:var(--green);box-shadow:0 0 6px var(--green);}
+/* Conn status badge */
+.conn-status{position:fixed;top:10px;right:10px;z-index:50;font-size:10px;
+  font-family:'Space Mono',monospace;background:var(--card);border:1px solid var(--border2);
+  border-radius:18px;padding:4px 10px;display:flex;align-items:center;gap:5px;}
+.conn-dot{width:6px;height:6px;border-radius:50%;}
+.conn-status.online .conn-dot{background:var(--green);box-shadow:0 0 5px var(--green);}
 .conn-status.offline .conn-dot{background:var(--red);}
 .conn-status.online{color:var(--green);}
 .conn-status.offline{color:var(--red);}
 
-/* LIGHTBOX */
-.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);
-  z-index:100;align-items:center;justify-content:center;cursor:pointer;}
+/* ══ LIGHTBOX — with X close button, no tab close ══ */
+.lightbox{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.95);z-index:500;
+  flex-direction:column;align-items:center;justify-content:center;gap:16px;
+}
 .lightbox.show{display:flex;}
-.lightbox img{max-width:90vw;max-height:90vh;border-radius:12px;}
+.lb-topbar{
+  display:flex;align-items:center;justify-content:flex-end;
+  width:94vw;
+}
+.lb-close{
+  width:44px;height:44px;border-radius:50%;
+  background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.25);
+  color:#fff;font-size:22px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-weight:700;
+  line-height:1;
+}
+.lightbox img{
+  max-width:94vw;max-height:76vh;
+  border-radius:10px;display:block;
+  object-fit:contain;
+}
+.lb-hint{font-size:11px;color:rgba(255,255,255,.3);font-family:'Space Mono',monospace;}
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
-@media(max-width:480px){
-  .ob-logo-title{font-size:30px;}
+@media(max-width:400px){
+  .ob-logo-title{font-size:28px;}
   .pref-grid{grid-template-columns:repeat(2,1fr);}
   .message{max-width:88%;}
 }
@@ -287,7 +259,7 @@ body::before{content:'';position:fixed;inset:0;
 </head>
 <body>
 
-<!-- CONNECTION STATUS -->
+<!-- Conn badge -->
 <div class="conn-status offline" id="connStatus">
   <div class="conn-dot"></div>
   <span id="connLabel">Connecting...</span>
@@ -304,11 +276,11 @@ body::before{content:'';position:fixed;inset:0;
   <div class="safety-banner">
     <div class="safety-title">🛡️ Safety Guidelines — Zaroor Padho</div>
     <ul class="safety-rules">
-      <li>Apna real naam, phone number, address ya koi bhi personal info KABHI share mat karo</li>
+      <li>Apna real naam, phone, address ya koi bhi personal info KABHI share mat karo</li>
       <li>Kisi ke pressure mein aake apni photos ya videos mat bhejo</li>
-      <li>Koi bhi suspicious lagey toh turant "Skip" karo — koi explanation nahi deni</li>
-      <li>Sab messages end-to-end encrypted hain — server pe plain text kabhi store nahi hota</li>
-      <li>18+ content strictly forbidden — aise logo ko report karo</li>
+      <li>Suspicious lagey toh turant Skip karo — koi explanation nahi deni</li>
+      <li>Sab messages encrypted hain — server pe kuch bhi save nahi hota</li>
+      <li>18+ content strictly forbidden</li>
     </ul>
   </div>
 
@@ -365,8 +337,8 @@ body::before{content:'';position:fixed;inset:0;
       </div>
     </div>
     <div class="header-btns">
-      <button class="hbtn new" title="New Partner" onclick="skipPartner()">🔀</button>
-      <button class="hbtn" title="Leave" onclick="leaveChat()">✕</button>
+      <button class="hbtn new" onclick="skipPartner()" title="Naya Partner">🔀</button>
+      <button class="hbtn" onclick="leaveChat()" title="Chat Chodo">✕</button>
     </div>
   </div>
 
@@ -386,45 +358,73 @@ body::before{content:'';position:fixed;inset:0;
   <div class="chat-footer">
     <button class="icon-btn" onclick="document.getElementById('fileInput').click()">📎</button>
     <input type="file" id="fileInput" accept="image/*" onchange="sendImage(event)">
-    <textarea class="msg-ta" id="msgInput" placeholder="Kuch bhi likho... (encrypted)"
+    <textarea class="msg-ta" id="msgInput" placeholder="Kuch bhi likho..."
       rows="1" onkeydown="handleKey(event)" oninput="autoResize(this);onTyping();"></textarea>
     <button class="btn-send" onclick="sendMsg()">➤</button>
   </div>
 </div>
 
-<!-- LIGHTBOX -->
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+<!-- ══ LIGHTBOX — proper close button, tab band nahi hoga ══ -->
+<div class="lightbox" id="lightbox">
+  <div class="lb-topbar">
+    <button class="lb-close" id="lbCloseBtn">✕</button>
+  </div>
   <img id="lbImg" src="" alt="image">
+  <div class="lb-hint">✕ dabao ya bahar tap karo band karne ke liye</div>
 </div>
 
-   <script>
+<script>
 // ══════════════════════════════════
-//   SIMPLE XOR ENCRYPTION (visual E2E simulation)
-//   In production: use WebCrypto AES-GCM with key from server
+//  XOR ENCRYPTION
 // ══════════════════════════════════
 function xorEncrypt(text, key) {
-  let result = '';
-  for (let i = 0; i < text.length; i++) {
-    result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-  }
-  return btoa(unescape(encodeURIComponent(result)));
+  let r = '';
+  for (let i = 0; i < text.length; i++)
+    r += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+  return btoa(unescape(encodeURIComponent(r)));
+}
+function xorDecrypt(enc, key) {
+  try {
+    const t = decodeURIComponent(escape(atob(enc)));
+    let r = '';
+    for (let i = 0; i < t.length; i++)
+      r += String.fromCharCode(t.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    return r;
+  } catch { return enc; }
 }
 
-function xorDecrypt(encoded, key) {
+// ══════════════════════════════════
+//  ADS — Adsterra
+//  Popunder ID: 29213864
+//  Social Bar ID: 29213865 (loaded in <head>)
+// ══════════════════════════════════
+let genderFilterCount = 0;
+
+function showPopunder() {
   try {
-    const text = decodeURIComponent(escape(atob(encoded)));
-    let result = '';
-    for (let i = 0; i < text.length; i++) {
-      result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-    }
-    return result;
-  } catch {
-    return encoded; // fallback
+    const s = document.createElement('script');
+    s.src = 'https://pl29314363.profitablecpmratenetwork.com/ad/bc/0d/adbc0d5cd7b0e112d5269e5d2cffbfec.js';
+    s.async = true;
+    document.head.appendChild(s);
+    setTimeout(() => { try { document.head.removeChild(s); } catch(e){} }, 5000);
+  } catch(e) {}
+}
+
+// Matching hone par ad — experience kharab na ho isliye 1 second baad
+function triggerMatchingAd() {
+  setTimeout(showPopunder, 1000);
+}
+
+// Har 3rd gender filter change par ad
+function triggerGenderFilterAd() {
+  genderFilterCount++;
+  if (genderFilterCount % 3 === 0) {
+    showPopunder();
   }
 }
 
 // ══════════════════════════════════
-//   STATE
+//  STATE
 // ══════════════════════════════════
 let socket = null;
 let myNick = 'Anonymous';
@@ -432,79 +432,61 @@ let myGender = '';
 let prefGender = 'any';
 let sharedKey = '';
 let isConnected = false;
-let isSearching = false;   // ← FIX: track search state
+let isSearching = false;
 let typingTimer = null;
 
 // ══════════════════════════════════
-//   SOCKET INIT
+//  SOCKET
 // ══════════════════════════════════
 function initSocket() {
   socket = io();
-
-  socket.on('connect', () => {
-    setConnStatus(true);
-    console.log('Socket connected:', socket.id);
-  });
-
+  socket.on('connect', () => setConnStatus(true));
   socket.on('disconnect', () => {
     setConnStatus(false);
-    if (isConnected) {
-      addSys('⚠️ Server se connection toot gaya — refresh karo');
-    }
+    if (isConnected) addSys('⚠️ Server se connection toot gaya — refresh karo');
   });
-
   socket.on('waiting', ({ position }) => {
-    document.getElementById('waitBadge').textContent = `⏳ Queue mein ho — ${position} log wait kar rahe hain`;
+    document.getElementById('waitBadge').textContent = `⏳ ${position} log wait kar rahe hain`;
   });
-
-  socket.on('matched', ({ partnerNick, partnerGender, roomId, sharedKey: key }) => {
-    // Agar user ne cancel kar diya toh match ignore karo
-    if (!isSearching) {
-      socket.emit('cancelSearch'); // server ko bhi batao
-      return;
-    }
+  socket.on('matched', ({ partnerNick, partnerGender, sharedKey: key }) => {
+    if (!isSearching) { socket.emit('cancelSearch'); return; }
     isSearching = false;
     sharedKey = key;
     isConnected = true;
 
-    const genderEmoji = {male:'♂️',female:'♀️',other:'⚧️'};
-    const genderIcon  = {male:'♂',female:'♀',other:'⚧'};
-    const genderLabel = {male:'Male • Online',female:'Female • Online',other:'Other • Online'};
+    const gE = {male:'♂️',female:'♀️',other:'⚧️'};
+    const gI = {male:'♂',female:'♀',other:'⚧'};
+    const gL = {male:'Male • Online',female:'Female • Online',other:'Other • Online'};
 
     document.getElementById('avatarWrap').className = 'avatar-wrap ' + partnerGender;
-    document.getElementById('partnerAvatar').textContent = genderEmoji[partnerGender] || '👤';
-    document.getElementById('genderBadge').textContent = genderIcon[partnerGender] || '?';
+    document.getElementById('partnerAvatar').textContent = gE[partnerGender] || '👤';
+    document.getElementById('genderBadge').textContent = gI[partnerGender] || '?';
     document.getElementById('partnerName').textContent = partnerNick;
-    document.getElementById('partnerGenderLabel').textContent = genderLabel[partnerGender] || 'Online';
+    document.getElementById('partnerGenderLabel').textContent = gL[partnerGender] || 'Online';
 
     clearMsgs();
     document.getElementById('discBar').classList.remove('show');
     document.getElementById('msgInput').disabled = false;
-
     showScreen('chatScreen');
-    addSys('✅ ' + partnerNick + ' (' + (genderEmoji[partnerGender]||'') + ') se connect hua!');
-    addSys('🔒 Messages encrypted hain — koi data save nahi hota');
-    addSys('⚠️ Personal info share mat karo!');
-  });
 
+    addSys('✅ ' + partnerNick + ' (' + (gE[partnerGender]||'') + ') se connect hua!');
+    addSys('🔒 Messages encrypted — koi data save nahi hota');
+    addSys('⚠️ Personal info share mat karo!');
+
+    // Matching ke baad 1 second baad popunder ad
+    triggerMatchingAd();
+  });
   socket.on('receiveMessage', ({ text, senderNick, timestamp }) => {
     hideTyping();
-    const decrypted = sharedKey ? xorDecrypt(text, sharedKey) : text;
-    addMsg(decrypted, 'other', senderNick, timestamp);
+    addMsg(sharedKey ? xorDecrypt(text, sharedKey) : text, 'other', senderNick, timestamp);
   });
-
   socket.on('receiveImage', ({ imageData, senderNick, timestamp }) => {
     hideTyping();
     addImgMsg(imageData, 'other', senderNick, timestamp);
   });
-
-  socket.on('partnerTyping', (isTyping) => {
-    isTyping ? showTyping() : hideTyping();
-  });
-
+  socket.on('partnerTyping', v => v ? showTyping() : hideTyping());
   socket.on('partnerLeft', () => {
-    isConnected = false;
-    sharedKey = '';
+    isConnected = false; sharedKey = '';
     hideTyping();
     document.getElementById('discBar').classList.add('show');
     document.getElementById('msgInput').disabled = true;
@@ -513,28 +495,21 @@ function initSocket() {
 }
 
 function setConnStatus(online) {
-  const el = document.getElementById('connStatus');
-  const label = document.getElementById('connLabel');
-  el.className = 'conn-status ' + (online ? 'online' : 'offline');
-  label.textContent = online ? 'Connected' : 'Offline';
+  document.getElementById('connStatus').className = 'conn-status ' + (online ? 'online' : 'offline');
+  document.getElementById('connLabel').textContent = online ? 'Connected' : 'Offline';
 }
 
 // ══════════════════════════════════
-//   UI HELPERS
+//  SCREENS
 // ══════════════════════════════════
 function showScreen(id) {
-  // Pehle sab screens hide karo
   document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-  // chatScreen ko alag handle karo
-  const chatScreen = document.getElementById('chatScreen');
-  if (id === 'chatScreen') {
-    chatScreen.classList.remove('hidden');
-  } else {
-    chatScreen.classList.add('hidden');
-    document.getElementById(id).classList.remove('hidden');
-  }
+  document.getElementById(id).classList.remove('hidden');
 }
 
+// ══════════════════════════════════
+//  ONBOARD
+// ══════════════════════════════════
 function selectGender(g, el) {
   document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
@@ -545,91 +520,93 @@ function selectPref(p, el) {
   document.querySelectorAll('.pref-btn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
   prefGender = p;
+  if (p !== 'any') triggerGenderFilterAd(); // specific filter select kiya — count karo
 }
 
 function startSearch() {
   if (!myGender) { alert('Pehle apna gender select karo!'); return; }
-  if (!socket || !socket.connected) { alert('Server se connect nahi hai! Page refresh karo.'); return; }
-
+  if (!socket || !socket.connected) { alert('Server se connect nahi! Refresh karo.'); return; }
   myNick = document.getElementById('nickInput').value.trim() || 'Anonymous';
-  const labels = {male:'♂️ Male ke saath',female:'♀️ Female ke saath',other:'⚧️ Other ke saath',any:'🎲 Anyone ke saath'};
-  document.getElementById('waitBadge').textContent = labels[prefGender] || '🎲 Anyone';
-
+  const L = {male:'♂️ Male ke saath',female:'♀️ Female ke saath',other:'⚧️ Other ke saath',any:'🎲 Anyone ke saath'};
+  document.getElementById('waitBadge').textContent = L[prefGender] || '🎲 Anyone';
   showScreen('waitScreen');
-  isSearching = true;   // ← search shuru
+  isSearching = true;
   socket.emit('findPartner', { nick: myNick, gender: myGender, pref: prefGender });
 }
 
 function cancelSearch() {
-  isSearching = false;   // ← search band
+  isSearching = false;
   socket.emit('cancelSearch');
   showScreen('onboardScreen');
 }
 
 function skipPartner() {
-  isConnected = false;
-  sharedKey = '';
+  isConnected = false; sharedKey = '';
   clearMsgs();
   showScreen('waitScreen');
-  isSearching = true;   // ← naya search shuru
+  isSearching = true;
   socket.emit('skip');
 }
 
 function leaveChat() {
-  isConnected = false;
-  sharedKey = '';
+  isConnected = false; sharedKey = '';
   hideTyping();
   document.getElementById('discBar').classList.add('show');
   document.getElementById('msgInput').disabled = true;
   addSys('👋 Tumne chat chhod di — koi data save nahi hua');
-  socket.emit('skip'); // notify server
+  socket.emit('skip');
 }
 
 // ══════════════════════════════════
-//   MESSAGES
+//  MESSAGES
 // ══════════════════════════════════
 function addSys(text) {
   const msgs = document.getElementById('msgs');
-  const trow = document.getElementById('typingRow');
+  const tr = document.getElementById('typingRow');
   const d = document.createElement('div');
   d.className = 'sys-msg'; d.textContent = text;
-  msgs.insertBefore(d, trow);
+  msgs.insertBefore(d, tr);
   msgs.scrollTop = msgs.scrollHeight;
 }
 
 function addMsg(text, type, nick, ts) {
   const msgs = document.getElementById('msgs');
-  const trow = document.getElementById('typingRow');
-  const time = ts ? new Date(ts) : new Date();
-  const timeStr = time.getHours().toString().padStart(2,'0')+':'+time.getMinutes().toString().padStart(2,'0');
+  const tr = document.getElementById('typingRow');
+  const t = ts ? new Date(ts) : new Date();
+  const time = t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');
   const name = type === 'self' ? myNick : (nick || 'Stranger');
   const d = document.createElement('div');
   d.className = 'message ' + type;
   d.innerHTML = `<div class="msg-bubble">${escHtml(text)}</div>
-    <div class="msg-meta"><span>${name} • ${timeStr}</span><span class="enc-tag">🔒 encrypted</span></div>`;
-  msgs.insertBefore(d, trow);
+    <div class="msg-meta"><span>${name} • ${time}</span><span class="enc-tag">🔒</span></div>`;
+  msgs.insertBefore(d, tr);
   msgs.scrollTop = msgs.scrollHeight;
 }
 
 function addImgMsg(src, type, nick, ts) {
   const msgs = document.getElementById('msgs');
-  const trow = document.getElementById('typingRow');
-  const time = ts ? new Date(ts) : new Date();
-  const timeStr = time.getHours().toString().padStart(2,'0')+':'+time.getMinutes().toString().padStart(2,'0');
+  const tr = document.getElementById('typingRow');
+  const t = ts ? new Date(ts) : new Date();
+  const time = t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');
   const name = type === 'self' ? myNick : (nick || 'Stranger');
+  const uid = 'img' + Date.now() + Math.random().toString(36).slice(2,6);
   const d = document.createElement('div');
   d.className = 'message ' + type;
-  d.innerHTML = `<div class="msg-bubble" style="padding:6px;">
-      <img class="msg-img" src="${src}" onclick="openLightbox('${src}')" alt="image"/></div>
-    <div class="msg-meta"><span>${name} • ${timeStr}</span><span class="enc-tag">🔒 encrypted</span></div>`;
-  msgs.insertBefore(d, trow);
+  d.innerHTML = `<div class="msg-bubble" style="padding:5px;">
+    <img class="msg-img" id="${uid}" alt="photo"></div>
+    <div class="msg-meta"><span>${name} • ${time}</span><span class="enc-tag">🔒</span></div>`;
+  msgs.insertBefore(d, tr);
+  const img = document.getElementById(uid);
+  img.src = src;
+  img.addEventListener('click', () => openLightbox(src));
   msgs.scrollTop = msgs.scrollHeight;
 }
 
 function clearMsgs() {
   const msgs = document.getElementById('msgs');
   const t = document.getElementById('typingRow');
-  msgs.innerHTML = ''; msgs.appendChild(t);
+  msgs.innerHTML = '';
+  msgs.appendChild(t);
 }
 
 function escHtml(t) {
@@ -639,18 +616,18 @@ function escHtml(t) {
 }
 
 // ══════════════════════════════════
-//   SEND
+//  SEND
 // ══════════════════════════════════
 function sendMsg() {
   if (!isConnected || !socket) return;
   const inp = document.getElementById('msgInput');
   const txt = inp.value.trim();
   if (!txt) return;
-
-  const encrypted = sharedKey ? xorEncrypt(txt, sharedKey) : txt;
-  socket.emit('sendMessage', { text: txt, encryptedText: encrypted });
+  const enc = sharedKey ? xorEncrypt(txt, sharedKey) : txt;
+  socket.emit('sendMessage', { text: txt, encryptedText: enc });
   addMsg(txt, 'self', myNick);
-  inp.value = ''; inp.style.height = 'auto';
+  inp.value = '';
+  inp.style.height = 'auto';
   socket.emit('typing', false);
 }
 
@@ -685,25 +662,41 @@ function onTyping() {
 
 function showTyping() {
   document.getElementById('typingRow').classList.add('show');
-  document.getElementById('msgs').scrollTop = 9999;
+  document.getElementById('msgs').scrollTop = 99999;
 }
 function hideTyping() { document.getElementById('typingRow').classList.remove('show'); }
 
 // ══════════════════════════════════
-//   LIGHTBOX
+//  LIGHTBOX — X button se band, tab band nahi hoga
 // ══════════════════════════════════
 function openLightbox(src) {
   document.getElementById('lbImg').src = src;
   document.getElementById('lightbox').classList.add('show');
 }
-function closeLightbox() { document.getElementById('lightbox').classList.remove('show'); }
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('show');
+  setTimeout(() => { document.getElementById('lbImg').src = ''; }, 300);
+}
+
+// X button
+document.getElementById('lbCloseBtn').addEventListener('click', function(e) {
+  e.stopPropagation();
+  closeLightbox();
+});
+// Bahar tap karne par bhi band ho
+document.getElementById('lightbox').addEventListener('click', function(e) {
+  if (e.target === this || e.target === document.getElementById('lbImg')) {
+    closeLightbox();
+  }
+});
 
 // ══════════════════════════════════
-//   INIT
+//  INIT
 // ══════════════════════════════════
 document.getElementById('nickInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') startSearch();
 });
+
 initSocket();
 </script>
 </body>
