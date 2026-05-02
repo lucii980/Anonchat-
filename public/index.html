@@ -336,9 +336,8 @@ body::before{content:'';position:fixed;inset:0;
   <div class="wait-badge" id="waitBadge">🎲 Anyone ke saath</div>
   <button class="btn-cancel" onclick="cancelSearch()">✕ Cancel</button>
 
-  <!-- Native Banner — waiting ke waqt dikhao -->
-  <div class="native-banner-wrap">
-    <script async="async" data-cfasync="false" src="https://pl29319176.profitablecpmratenetwork.com/8cb9a9839af7f86265b99f5eb289086a/invoke.js"></script>
+  <!-- Native Banner — sirf ek, waiting ke waqt -->
+  <div class="native-banner-wrap" id="nativeBannerWrap">
     <div id="container-8cb9a9839af7f86265b99f5eb289086a"></div>
   </div>
 </div>
@@ -572,7 +571,7 @@ function openMission() {
 function closeMission() {
   document.getElementById('missionModal').classList.remove('show');
 }
-  
+
 // ══════════════════════════════════
 //  CHAT DATA PERSISTENCE
 //  Tab reload par data rahe, match end par clear ho
@@ -656,6 +655,7 @@ function initSocket() {
     document.getElementById('discBar').classList.remove('show');
     document.getElementById('msgInput').disabled = false;
     showScreen('chatScreen');
+    removeNativeBanner(); // match ho gaya — banner hatao
 
     // Session save karo
     saveChatSession({
@@ -742,6 +742,7 @@ function setConnStatus(online) {
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
+  if (id === 'waitScreen') loadNativeBanner();
 }
 
 // ══════════════════════════════════
@@ -940,8 +941,23 @@ function showToast(msg) {
 }
 
 // ══════════════════════════════════
-//  INIT
+//  NATIVE BANNER — sirf ek, waiting par load, match par remove
 // ══════════════════════════════════
+let nativeBannerLoaded = false;
+function loadNativeBanner() {
+  if (nativeBannerLoaded) return;
+  nativeBannerLoaded = true;
+  const s = document.createElement('script');
+  s.async = true;
+  s.setAttribute('data-cfasync', 'false');
+  s.src = 'https://pl29319176.profitablecpmratenetwork.com/8cb9a9839af7f86265b99f5eb289086a/invoke.js';
+  document.getElementById('nativeBannerWrap').appendChild(s);
+}
+function removeNativeBanner() {
+  const wrap = document.getElementById('nativeBannerWrap');
+  if (wrap) wrap.innerHTML = '';
+  nativeBannerLoaded = false;
+}
 document.getElementById('nickInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') startSearch();
 });
