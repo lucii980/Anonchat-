@@ -228,8 +228,9 @@ function handleDisconnectFromPair(socket) {
   }
 }
 
-// ── Start ──
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`🚀 AnonChat Server running on http://localhost:${PORT}`);
+// Railway aur external traffic ke liye 0.0.0.0 par listen karna zaruri hai
+const PORT = process.env.PORT || 8080;
+
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server live on port ${PORT}`);
 });
