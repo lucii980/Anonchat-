@@ -1,23 +1,26 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const path = require('path');
 const crypto = require('crypto');
 
 const app = express();
 const server = http.createServer(app);
+
+// Vercel frontend URL yahan daalo
+const FRONTEND_URL = process.env.FRONTEND_URL || '*';
+
 const io = new Server(server, {
-  cors: { 
-    origin: '*', 
-    methods: ['GET', 'POST'] 
+  cors: {
+    origin: ['https://anonchat-ruddy.vercel.app', FRONTEND_URL, '*'],
+    methods: ['GET', 'POST'],
+    credentials: false
   },
-  transports: ['websocket', 'polling'], // <-- Ye line connection fast banati hai
   maxHttpBufferSize: 5 * 1024 * 1024
 });
-app.use(express.static(path.join(__dirname, 'public')));
 
-// ── Health check ──
-app.get('/health', (req, res) => res.json({ status: 'ok', users: waitingUsers.size + connectedPairs.size * 2 }));
+// Health check
+app.get('/', (req, res) => res.json({ status: 'AnonChat backend running' }));
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 // ── Waiting queues by preference ──
 // Key: 'male', 'female', 'other', 'any'
@@ -228,9 +231,8 @@ function handleDisconnectFromPair(socket) {
   }
 }
 
-// Railway aur external traffic ke liye 0.0.0.0 par listen karna zaruri hai
-const PORT = process.env.PORT || 8080;
-
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server live on port ${PORT}`);
+// ── Start ──
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`🚀 AnonChat Server running on http://localhost:${PORT}`);
 });
