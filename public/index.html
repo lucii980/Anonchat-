@@ -605,6 +605,7 @@ function saveMsgToSession(obj) {
   }
 }
 
+
 // ══════════════════════════════════
 //  STATE
 // ══════════════════════════════════
@@ -618,10 +619,15 @@ let isSearching = false;
 let typingTimer = null;
 
 // ══════════════════════════════════
-//  SOCKET
+//  SOCKET — Render backend se connect karo
 // ══════════════════════════════════
 function initSocket() {
-  socket = io();
+  // Apna Render backend URL yahan daalo
+  // ⚠️ Yahan apna Render URL daalo — deploy ke baad milega
+  const BACKEND_URL = 'https://anonchat-06dg.onrender.com';
+  socket = io(BACKEND_URL, {
+    transports: ['websocket', 'polling']
+  });
   socket.on('connect', () => {
     setConnStatus(true);
     // Reload ke baad session restore karo
