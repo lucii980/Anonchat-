@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>AnonChat — Safe & Anonymous</title>
 <script src="/socket.io/socket.io.js"></script>
-<!-- Social Bar — hamesha dikhega -->
+<!-- Adsterra Social Bar -->
 <script src="https://pl29314364.profitablecpmratenetwork.com/2b/c0/8a/2bc08a101d0d4a1068afd453820f01a5.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
@@ -13,7 +13,7 @@
   --bg:#080b12;--surface:#0d1017;--card:#111520;--card2:#151a28;
   --border:#1e2535;--border2:#252d40;
   --accent-m:#4f9eff;--accent-f:#ff6eb4;--accent-a:#a78bfa;
-  --accent:#4f9eff;--green:#22d3a0;--red:#ff4d6a;--gold:#f59e0b;
+  --accent:#4f9eff;--green:#22d3a0;--red:#ff4d6a;
   --text:#dde4f0;--muted:#5a6480;--muted2:#8899bb;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -23,14 +23,13 @@ body::before{content:'';position:fixed;inset:0;
     radial-gradient(ellipse 60% 60% at 85% 90%,rgba(167,139,250,.06) 0%,transparent 60%);
   pointer-events:none;z-index:0;}
 
-/* ══ SCREENS ══ */
+/* SCREENS */
 .screen{position:fixed;inset:0;display:flex;flex-direction:column;
   align-items:center;justify-content:flex-start;z-index:1;overflow-y:auto;
-  padding:20px 16px 80px; /* bottom padding for social bar */
-  transition:opacity .3s,transform .3s;}
+  padding:20px 16px 80px;transition:opacity .3s,transform .3s;}
 .screen.hidden{opacity:0;pointer-events:none;transform:scale(.97);display:none !important;}
 
-/* ══ ONBOARD ══ */
+/* ONBOARD */
 #onboardScreen{justify-content:flex-start;gap:12px;padding-top:16px;}
 .ob-logo{text-align:center;width:100%;}
 .ob-logo-icon{font-size:40px;display:block;margin-bottom:4px;
@@ -40,18 +39,6 @@ body::before{content:'';position:fixed;inset:0;
   background:linear-gradient(135deg,#4f9eff,#a78bfa,#ff6eb4);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 .ob-logo-sub{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:2px;margin-top:2px;}
-
-/* token bar on home */
-.token-bar{width:100%;max-width:460px;
-  background:var(--card);border:1px solid rgba(245,158,11,.25);
-  border-radius:12px;padding:10px 14px;
-  display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.token-info{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--gold);}
-.token-info span{font-size:18px;}
-.token-sub{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;}
-.btn-mission{padding:7px 14px;background:linear-gradient(135deg,#f59e0b,#d97706);
-  border:none;border-radius:9px;color:#000;font-family:'Syne',sans-serif;
-  font-size:12px;font-weight:800;cursor:pointer;}
 
 .safety-banner{width:100%;max-width:460px;
   background:rgba(255,77,106,.07);border:1px solid rgba(255,77,106,.22);
@@ -86,42 +73,7 @@ body::before{content:'';position:fixed;inset:0;
 .enc-note{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;text-align:center;}
 .enc-note span{color:var(--green);}
 
-/* ══ MISSION MODAL ══ */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);
-  z-index:200;align-items:center;justify-content:center;padding:20px;}
-.modal-overlay.show{display:flex;}
-.modal-box{background:var(--card);border:1px solid var(--border2);border-radius:20px;
-  padding:24px;width:100%;max-width:380px;}
-.modal-title{font-size:18px;font-weight:800;margin-bottom:4px;
-  display:flex;align-items:center;gap:8px;}
-.modal-sub{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:18px;}
-.mission-list{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;}
-.mission-item{background:var(--surface);border:1px solid var(--border2);border-radius:12px;
-  padding:12px 14px;display:flex;align-items:center;gap:12px;}
-.mission-icon{font-size:22px;flex-shrink:0;}
-.mission-info{flex:1;}
-.mission-name{font-size:13px;font-weight:700;}
-.mission-desc{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px;}
-.mission-reward{font-size:12px;font-weight:800;color:var(--gold);white-space:nowrap;}
-.btn-watch-ad{padding:8px 14px;border:none;border-radius:9px;cursor:pointer;
-  font-family:'Syne',sans-serif;font-size:12px;font-weight:700;
-  background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;flex-shrink:0;}
-.btn-watch-ad:disabled{background:var(--border2);color:var(--muted);cursor:not-allowed;}
-.token-status{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);
-  border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;}
-.token-count{font-size:16px;font-weight:800;color:var(--gold);}
-.btn-use-token{padding:8px 14px;background:rgba(34,211,160,.1);border:1px solid rgba(34,211,160,.3);
-  border-radius:9px;color:var(--green);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
-.btn-use-token:disabled{background:var(--border2);border-color:var(--border2);color:var(--muted);cursor:not-allowed;}
-.modal-close{width:100%;padding:11px;background:transparent;border:1px solid var(--border2);
-  border-radius:11px;color:var(--muted);font-family:'Syne',sans-serif;font-size:13px;
-  cursor:pointer;margin-top:12px;}
-.ads-off-badge{display:none;align-items:center;gap:6px;font-size:11px;color:var(--green);
-  font-family:'Space Mono',monospace;background:rgba(34,211,160,.08);border:1px solid rgba(34,211,160,.2);
-  border-radius:10px;padding:4px 10px;}
-.ads-off-badge.show{display:flex;}
-
-/* ══ WAITING ══ */
+/* WAITING */
 #waitScreen{justify-content:center;gap:16px;}
 .wait-ring{width:82px;height:82px;border-radius:50%;
   border:2px solid transparent;border-top-color:var(--accent);border-right-color:rgba(79,158,255,.3);
@@ -137,11 +89,9 @@ body::before{content:'';position:fixed;inset:0;
 @keyframes blink{0%,80%,100%{opacity:.2;}40%{opacity:1;}}
 .btn-cancel{padding:10px 24px;background:transparent;border:1px solid var(--border2);border-radius:10px;
   color:var(--muted);font-family:'Syne',sans-serif;font-size:13px;cursor:pointer;}
-
-/* ══ NATIVE BANNER — waiting screen pe ══ */
 .native-banner-wrap{width:100%;max-width:420px;margin-top:8px;}
 
-/* ══ CHAT SCREEN ══ */
+/* CHAT SCREEN */
 #chatScreen{
   position:fixed;top:0;left:0;right:0;bottom:0;
   height:100vh;height:100dvh;
@@ -149,10 +99,8 @@ body::before{content:'';position:fixed;inset:0;
   overflow:hidden;display:flex;flex-direction:column;z-index:10;
 }
 #chatScreen.hidden{display:none !important;}
-
 .chat-header{background:var(--card);border-bottom:1px solid var(--border);
-  padding:10px 13px;display:flex;align-items:center;gap:10px;
-  flex-shrink:0;z-index:2;min-height:58px;}
+  padding:10px 13px;display:flex;align-items:center;gap:10px;flex-shrink:0;z-index:2;min-height:58px;}
 .avatar-wrap{position:relative;flex-shrink:0;}
 .partner-avatar{width:37px;height:37px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid transparent;}
@@ -176,8 +124,6 @@ body::before{content:'';position:fixed;inset:0;
 .header-btns{display:flex;gap:5px;flex-shrink:0;}
 .hbtn{width:32px;height:32px;border-radius:8px;background:transparent;border:1px solid var(--border2);
   color:var(--muted);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
-
-/* Messages */
 .msgs{flex:1;min-height:0;overflow-y:scroll;-webkit-overflow-scrolling:touch;
   overscroll-behavior:contain;padding:12px 13px 8px;display:flex;flex-direction:column;gap:7px;}
 .sys-msg{align-self:center;text-align:center;font-size:11px;color:var(--muted);
@@ -195,8 +141,6 @@ body::before{content:'';position:fixed;inset:0;
   margin-top:3px;padding:0 2px;display:flex;align-items:center;gap:4px;}
 .message.self .msg-meta{justify-content:flex-end;}
 .enc-tag{font-size:9px;color:var(--green);}
-
-/* Typing */
 .typing-row{display:none;align-self:flex-start;}
 .typing-row.show{display:flex;}
 .typing-bubble{background:var(--card2);border:1px solid var(--border2);
@@ -204,16 +148,12 @@ body::before{content:'';position:fixed;inset:0;
 .t-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:bounce 1.2s ease-in-out infinite;}
 .t-dot:nth-child(2){animation-delay:.2s;}.t-dot:nth-child(3){animation-delay:.4s;}
 @keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.4;}30%{transform:translateY(-5px);opacity:1;}}
-
-/* Disconnected */
 .disc-bar{display:none;background:rgba(255,77,106,.07);border-top:1px solid rgba(255,77,106,.2);
   padding:9px 13px;align-items:center;justify-content:center;gap:10px;
   font-size:12px;color:var(--red);font-family:'Space Mono',monospace;flex-shrink:0;}
 .disc-bar.show{display:flex;}
 .btn-renew{padding:5px 12px;background:rgba(255,77,106,.12);border:1px solid rgba(255,77,106,.3);
   border-radius:7px;color:var(--red);font-family:'Syne',sans-serif;font-size:12px;cursor:pointer;}
-
-/* Footer */
 .chat-footer{background:var(--card);border-top:1px solid var(--border);
   padding:9px 11px;padding-bottom:max(9px,env(safe-area-inset-bottom));
   display:flex;gap:7px;align-items:flex-end;flex-shrink:0;}
@@ -230,8 +170,6 @@ body::before{content:'';position:fixed;inset:0;
 .btn-send{width:38px;height:38px;border-radius:10px;flex-shrink:0;
   background:linear-gradient(135deg,#4f9eff,#7c6bff);border:none;color:#fff;
   font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-
-/* Conn badge */
 .conn-status{position:fixed;top:8px;right:8px;z-index:50;font-size:10px;
   font-family:'Space Mono',monospace;background:var(--card);border:1px solid var(--border2);
   border-radius:16px;padding:4px 9px;display:flex;align-items:center;gap:5px;}
@@ -239,8 +177,6 @@ body::before{content:'';position:fixed;inset:0;
 .conn-status.online .conn-dot{background:var(--green);box-shadow:0 0 4px var(--green);}
 .conn-status.offline .conn-dot{background:var(--red);}
 .conn-status.online{color:var(--green);}.conn-status.offline{color:var(--red);}
-
-/* Lightbox */
 .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:500;
   flex-direction:column;align-items:center;justify-content:center;gap:14px;}
 .lightbox.show{display:flex;}
@@ -250,14 +186,11 @@ body::before{content:'';position:fixed;inset:0;
   display:flex;align-items:center;justify-content:center;font-weight:700;}
 .lightbox img{max-width:94vw;max-height:76vh;border-radius:10px;display:block;object-fit:contain;}
 .lb-hint{font-size:11px;color:rgba(255,255,255,.28);font-family:'Space Mono',monospace;}
-
-/* Toast notification */
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);
   background:var(--card);border:1px solid var(--border2);border-radius:12px;
   padding:10px 18px;font-size:13px;font-family:'Space Mono',monospace;
   color:var(--text);opacity:0;transition:all .3s;z-index:300;white-space:nowrap;pointer-events:none;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
 @media(max-width:400px){
   .ob-logo-title{font-size:28px;}
   .pref-grid{grid-template-columns:repeat(2,1fr);}
@@ -267,31 +200,18 @@ body::before{content:'';position:fixed;inset:0;
 </head>
 <body>
 
-<!-- Conn badge -->
 <div class="conn-status offline" id="connStatus">
   <div class="conn-dot"></div><span id="connLabel">Connecting...</span>
 </div>
-
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<!-- ══ ONBOARD ══ -->
+<!-- ONBOARD -->
 <div class="screen" id="onboardScreen">
   <div class="ob-logo">
     <span class="ob-logo-icon">🔐</span>
     <div class="ob-logo-title">AnonChat</div>
     <div class="ob-logo-sub">// safe · anonymous · encrypted //</div>
   </div>
-
-  <!-- Token Bar -->
-  <div class="token-bar">
-    <div>
-      <div class="token-info"><span>🪙</span><span id="homeTokenCount">0</span> TalkTokens</div>
-      <div class="token-sub" id="adsOffLabel">Missions se earn karo, ads hatao</div>
-    </div>
-    <button class="btn-mission" onclick="openMission()">🎯 Missions</button>
-  </div>
-
   <div class="safety-banner">
     <div class="safety-title">🛡️ Safety Guidelines</div>
     <ul class="safety-rules">
@@ -302,7 +222,6 @@ body::before{content:'';position:fixed;inset:0;
       <li>18+ content strictly forbidden</li>
     </ul>
   </div>
-
   <div class="ob-card">
     <div class="field-label">Apna Nickname</div>
     <input class="nick-input" id="nickInput" type="text" placeholder="Anonymous_Rider" maxlength="20"/>
@@ -328,21 +247,20 @@ body::before{content:'';position:fixed;inset:0;
   <div class="enc-note">🔒 End-to-end <span>encrypted</span> — Zero logs</div>
 </div>
 
-<!-- ══ WAITING ══ -->
+<!-- WAITING -->
 <div class="screen hidden" id="waitScreen">
   <div class="wait-ring"><div class="wait-inner">👁️</div></div>
   <div class="wait-title">Partner Dhundh Rahe Hain<span class="dots"><span>.</span><span>.</span><span>.</span></span></div>
   <div class="wait-sub">Tumhari preference ke hisab se match ho raha hai</div>
   <div class="wait-badge" id="waitBadge">🎲 Anyone ke saath</div>
   <button class="btn-cancel" onclick="cancelSearch()">✕ Cancel</button>
-
-  <!-- Native Banner — sirf ek, waiting ke waqt -->
+  <!-- Native Banner — sirf waiting screen pe, sirf ek -->
   <div class="native-banner-wrap" id="nativeBannerWrap">
     <div id="container-8cb9a9839af7f86265b99f5eb289086a"></div>
   </div>
 </div>
 
-<!-- ══ CHAT ══ -->
+<!-- CHAT -->
 <div class="screen hidden" id="chatScreen">
   <div class="chat-header">
     <div class="avatar-wrap" id="avatarWrap">
@@ -358,11 +276,10 @@ body::before{content:'';position:fixed;inset:0;
       </div>
     </div>
     <div class="header-btns">
-      <button class="hbtn" onclick="skipPartner()" title="Naya Partner">🔀</button>
-      <button class="hbtn" onclick="leaveChat()" title="Chat Chodo">✕</button>
+      <button class="hbtn" onclick="skipPartner()">🔀</button>
+      <button class="hbtn" onclick="leaveChat()">✕</button>
     </div>
   </div>
-
   <div class="msgs" id="msgs">
     <div class="typing-row" id="typingRow">
       <div class="typing-bubble">
@@ -370,12 +287,10 @@ body::before{content:'';position:fixed;inset:0;
       </div>
     </div>
   </div>
-
   <div class="disc-bar" id="discBar">
     😞 Stranger ne chat chhod di
     <button class="btn-renew" onclick="skipPartner()">Naya Dhundho</button>
   </div>
-
   <div class="chat-footer">
     <button class="icon-btn" onclick="document.getElementById('fileInput').click()">📎</button>
     <input type="file" id="fileInput" accept="image/*" onchange="sendImage(event)">
@@ -385,66 +300,7 @@ body::before{content:'';position:fixed;inset:0;
   </div>
 </div>
 
-<!-- ══ MISSION MODAL ══ -->
-<div class="modal-overlay" id="missionModal">
-  <div class="modal-box">
-    <div class="modal-title">🎯 Missions <span style="font-size:13px;color:var(--muted);font-weight:400;">TalkTokens Kamao</span></div>
-    <div class="modal-sub">Reward ad dekho → tokens pao → 10 min ke liye ads band karo</div>
-
-    <div class="mission-list">
-      <!-- Mission 1 -->
-      <div class="mission-item">
-        <div class="mission-icon">📺</div>
-        <div class="mission-info">
-          <div class="mission-name">Daily Reward</div>
-          <div class="mission-desc">Ek reward ad dekho</div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
-          <div class="mission-reward">+2 🪙</div>
-          <button class="btn-watch-ad" id="btn-m1" onclick="watchRewardAd(1,2)">Watch</button>
-        </div>
-      </div>
-      <!-- Mission 2 -->
-      <div class="mission-item">
-        <div class="mission-icon">🎬</div>
-        <div class="mission-info">
-          <div class="mission-name">Super Boost</div>
-          <div class="mission-desc">3 reward ads dekho</div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
-          <div class="mission-reward">+5 🪙</div>
-          <button class="btn-watch-ad" id="btn-m2" onclick="watchRewardAd(2,5)">Watch</button>
-        </div>
-      </div>
-      <!-- Mission 3 -->
-      <div class="mission-item">
-        <div class="mission-icon">⭐</div>
-        <div class="mission-info">
-          <div class="mission-name">Mega Mission</div>
-          <div class="mission-desc">5 reward ads dekho</div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
-          <div class="mission-reward">+10 🪙</div>
-          <button class="btn-watch-ad" id="btn-m3" onclick="watchRewardAd(3,10)">Watch</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Token status & use -->
-    <div class="token-status">
-      <div>
-        <div style="font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;">Tumhare Tokens</div>
-        <div class="token-count">🪙 <span id="modalTokenCount">0</span> TalkTokens</div>
-        <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:3px;" id="adsOffTimer"></div>
-      </div>
-      <button class="btn-use-token" id="btnUseToken" onclick="useTokens()">10 min Ad-Free (10🪙)</button>
-    </div>
-
-    <button class="modal-close" onclick="closeMission()">Wapas Jao</button>
-  </div>
-</div>
-
-<!-- Lightbox -->
+<!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox">
   <div class="lb-topbar">
     <button class="lb-close" id="lbCloseBtn">✕</button>
@@ -454,9 +310,7 @@ body::before{content:'';position:fixed;inset:0;
 </div>
 
 <script>
-// ══════════════════════════════════
-//  XOR ENCRYPTION
-// ══════════════════════════════════
+// XOR ENCRYPTION
 function xorEncrypt(text, key) {
   let r = '';
   for (let i = 0; i < text.length; i++)
@@ -473,142 +327,40 @@ function xorDecrypt(enc, key) {
   } catch { return enc; }
 }
 
-// ══════════════════════════════════
-//  TOKENS & ADS SYSTEM
-// ══════════════════════════════════
-let tokens = parseInt(localStorage.getItem('ac_tokens') || '0');
-let adsOffUntil = parseInt(localStorage.getItem('ac_adsoff') || '0');
-let popunderShownThisSession = false; // ek baar per session
-let missionAdsWatched = { 1:0, 2:0, 3:0 };
-const MISSION_REQUIRED = { 1:1, 2:3, 3:5 };
-
-function saveTokens() {
-  localStorage.setItem('ac_tokens', tokens);
-  updateTokenUI();
+// NATIVE BANNER — sirf ek baar load, match hone par remove
+let nativeBannerLoaded = false;
+function loadNativeBanner() {
+  if (nativeBannerLoaded) return;
+  nativeBannerLoaded = true;
+  const s = document.createElement('script');
+  s.async = true;
+  s.setAttribute('data-cfasync', 'false');
+  s.src = 'https://pl29319176.profitablecpmratenetwork.com/8cb9a9839af7f86265b99f5eb289086a/invoke.js';
+  document.getElementById('nativeBannerWrap').appendChild(s);
+}
+function removeNativeBanner() {
+  const wrap = document.getElementById('nativeBannerWrap');
+  if (wrap) wrap.innerHTML = '';
+  nativeBannerLoaded = false;
 }
 
-function updateTokenUI() {
-  document.getElementById('homeTokenCount').textContent = tokens;
-  document.getElementById('modalTokenCount').textContent = tokens;
-  const now = Date.now();
-  const btnUse = document.getElementById('btnUseToken');
-  if (adsOffUntil > now) {
-    const mins = Math.ceil((adsOffUntil - now) / 60000);
-    document.getElementById('adsOffTimer').textContent = `✅ Ads band hain — ${mins} min baaki`;
-    document.getElementById('adsOffLabel').textContent = `✅ Ads band hain — ${mins} min baaki`;
-    btnUse.disabled = true;
-    btnUse.textContent = `${mins} min baaki`;
-  } else {
-    document.getElementById('adsOffTimer').textContent = '';
-    document.getElementById('adsOffLabel').textContent = 'Missions se earn karo, ads hatao';
-    btnUse.disabled = tokens < 10;
-    btnUse.textContent = '10 min Ad-Free (10🪙)';
-  }
-}
-
-function adsAllowed() {
-  return Date.now() > adsOffUntil;
-}
-
-// Popunder — sirf chat END par, sirf ek baar per session
-function showPopunderOnChatEnd() {
-  if (!adsAllowed()) return;
-  if (popunderShownThisSession) return; // bar bar nahi
-  popunderShownThisSession = true;
-  try {
-    const s = document.createElement('script');
-    s.src = 'https://pl29314363.profitablecpmratenetwork.com/ad/bc/0d/adbc0d5cd7b0e112d5269e5d2cffbfec.js';
-    s.async = true;
-    document.head.appendChild(s);
-    setTimeout(() => { try { document.head.removeChild(s); } catch(e){} }, 5000);
-  } catch(e) {}
-}
-
-// Reward Ad — smart link
-function watchRewardAd(missionId, reward) {
-  const required = MISSION_REQUIRED[missionId];
-  // Smart link open karo
-  window.open('https://www.profitablecpmratenetwork.com/td87pqxcz?key=41e5ffc960f77e517fd63c50e67709e4', '_blank');
-
-  missionAdsWatched[missionId] = (missionAdsWatched[missionId] || 0) + 1;
-  const watched = missionAdsWatched[missionId];
-  const btn = document.getElementById('btn-m' + missionId);
-
-  if (watched >= required) {
-    // Mission complete — reward do
-    tokens += reward;
-    saveTokens();
-    showToast('🎉 +' + reward + ' TalkTokens mile! Total: ' + tokens);
-    btn.disabled = true;
-    btn.textContent = '✅ Done';
-    missionAdsWatched[missionId] = 0; // reset for next time
-    // Next day ke liye 24 ghante baad reset
-    setTimeout(() => {
-      btn.disabled = false;
-      btn.textContent = 'Watch';
-    }, 24 * 60 * 60 * 1000);
-  } else {
-    const left = required - watched;
-    btn.textContent = `${watched}/${required} done`;
-    showToast(`📺 ${watched}/${required} ads dekhe — ${left} aur baki`);
-  }
-}
-
-function useTokens() {
-  if (tokens < 10) { showToast('❌ 10 tokens chahiye!'); return; }
-  tokens -= 10;
-  adsOffUntil = Date.now() + 10 * 60 * 1000; // 10 minutes
-  localStorage.setItem('ac_adsoff', adsOffUntil);
-  saveTokens();
-  showToast('✅ 10 min ke liye ads band!');
-  updateTokenUI();
-}
-
-function openMission() {
-  updateTokenUI();
-  document.getElementById('missionModal').classList.add('show');
-}
-function closeMission() {
-  document.getElementById('missionModal').classList.remove('show');
-}
-
-// ══════════════════════════════════
-//  CHAT DATA PERSISTENCE
-//  Tab reload par data rahe, match end par clear ho
-// ══════════════════════════════════
+// CHAT SESSION PERSISTENCE
 const CHAT_KEY = 'ac_chat_session';
-
+let chatMessages = [];
 function saveChatSession(data) {
   try { sessionStorage.setItem(CHAT_KEY, JSON.stringify(data)); } catch(e) {}
 }
-
 function loadChatSession() {
-  try {
-    const d = sessionStorage.getItem(CHAT_KEY);
-    return d ? JSON.parse(d) : null;
-  } catch(e) { return null; }
+  try { const d = sessionStorage.getItem(CHAT_KEY); return d ? JSON.parse(d) : null; } catch(e) { return null; }
 }
-
-function clearChatSession() {
-  sessionStorage.removeItem(CHAT_KEY);
-}
-
-// Chat messages ko sessionStorage mein save karo
-let chatMessages = []; // [{type, text, nick, ts, isImg, src}]
-
+function clearChatSession() { sessionStorage.removeItem(CHAT_KEY); }
 function saveMsgToSession(obj) {
   chatMessages.push(obj);
-  const session = loadChatSession();
-  if (session) {
-    session.messages = chatMessages;
-    saveChatSession(session);
-  }
+  const s = loadChatSession();
+  if (s) { s.messages = chatMessages; saveChatSession(s); }
 }
 
-
-// ══════════════════════════════════
-//  STATE
-// ══════════════════════════════════
+// STATE
 let socket = null;
 let myNick = 'Anonymous';
 let myGender = '';
@@ -618,19 +370,15 @@ let isConnected = false;
 let isSearching = false;
 let typingTimer = null;
 
-// ══════════════════════════════════
-//  SOCKET — Render backend se connect karo
-// ══════════════════════════════════
+// SOCKET
 function initSocket() {
-  // Apna Render backend URL yahan daalo
-  // ⚠️ Yahan apna Render URL daalo — deploy ke baad milega
-  const BACKEND_URL = 'https://anonchat-06dg.onrender.com';
+  const BACKEND_URL = 'https://web-production-c8d8b.up.railway.app';
   socket = io(BACKEND_URL, {
     transports: ['websocket', 'polling']
   });
+
   socket.on('connect', () => {
     setConnStatus(true);
-    // Reload ke baad session restore karo
     restoreSession();
   });
   socket.on('disconnect', () => {
@@ -661,20 +409,13 @@ function initSocket() {
     document.getElementById('discBar').classList.remove('show');
     document.getElementById('msgInput').disabled = false;
     showScreen('chatScreen');
-    removeNativeBanner(); // match ho gaya — banner hatao
+    removeNativeBanner();
 
-    // Session save karo
-    saveChatSession({
-      partnerNick, partnerGender, sharedKey: key,
-      myNick, myGender, socketId: socket.id,
-      messages: []
-    });
-
+    saveChatSession({ partnerNick, partnerGender, sharedKey: key, myNick, myGender, messages: [] });
     addSys('✅ ' + partnerNick + ' (' + (gE[partnerGender]||'') + ') se connect hua!');
     addSys('🔒 Messages encrypted — koi data save nahi hota');
     addSys('⚠️ Personal info share mat karo!');
   });
-
   socket.on('receiveMessage', ({ text, senderNick, timestamp }) => {
     hideTyping();
     const dec = sharedKey ? xorDecrypt(text, sharedKey) : text;
@@ -693,21 +434,16 @@ function initSocket() {
     document.getElementById('discBar').classList.add('show');
     document.getElementById('msgInput').disabled = true;
     addSys('👋 Stranger ne chat chhod di');
-    clearChatSession(); // match end — session clear
-    // Chat end par popunder
-    showPopunderOnChatEnd();
+    clearChatSession();
   });
 }
 
-// Reload ke baad session restore karo
 function restoreSession() {
   const session = loadChatSession();
   if (!session) return;
-
-  // Session mila — chat screen restore karo
   sharedKey = session.sharedKey;
   myNick = session.myNick || myNick;
-  isConnected = false; // socket reconnect hoga, actual connection nahi hai
+  isConnected = false;
 
   const gE = {male:'♂️',female:'♀️',other:'⚧️'};
   const gI = {male:'♂',female:'♀',other:'⚧'};
@@ -723,7 +459,6 @@ function restoreSession() {
   clearMsgs();
   showScreen('chatScreen');
 
-  // Purane messages restore karo
   if (session.messages && session.messages.length > 0) {
     chatMessages = session.messages;
     session.messages.forEach(m => {
@@ -731,7 +466,6 @@ function restoreSession() {
       else addMsg(m.text, m.type, m.nick, m.ts);
     });
   }
-
   addSys('🔄 Session restore hua — partner shayad disconnect ho gaya ho');
   document.getElementById('discBar').classList.add('show');
   document.getElementById('msgInput').disabled = true;
@@ -742,74 +476,60 @@ function setConnStatus(online) {
   document.getElementById('connLabel').textContent = online ? 'Connected' : 'Offline';
 }
 
-// ══════════════════════════════════
-//  SCREENS
-// ══════════════════════════════════
+// SCREENS
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
   if (id === 'waitScreen') loadNativeBanner();
 }
 
-// ══════════════════════════════════
-//  ONBOARD
-// ══════════════════════════════════
+// ONBOARD
 function selectGender(g, el) {
   document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
   myGender = g;
 }
-
 function selectPref(p, el) {
   document.querySelectorAll('.pref-btn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
   prefGender = p;
 }
-
 function startSearch() {
   if (!myGender) { alert('Pehle apna gender select karo!'); return; }
   if (!socket || !socket.connected) { alert('Server se connect nahi! Refresh karo.'); return; }
   myNick = document.getElementById('nickInput').value.trim() || 'Anonymous';
   const L = {male:'♂️ Male ke saath',female:'♀️ Female ke saath',other:'⚧️ Other ke saath',any:'🎲 Anyone ke saath'};
   document.getElementById('waitBadge').textContent = L[prefGender] || '🎲 Anyone';
-  clearChatSession(); // naya match — purana clear
+  clearChatSession();
   chatMessages = [];
   showScreen('waitScreen');
   isSearching = true;
   socket.emit('findPartner', { nick: myNick, gender: myGender, pref: prefGender });
 }
-
 function cancelSearch() {
   isSearching = false;
   socket.emit('cancelSearch');
   showScreen('onboardScreen');
 }
-
 function skipPartner() {
   isConnected = false; sharedKey = '';
-  clearChatSession(); // match end
-  chatMessages = [];
+  clearChatSession(); chatMessages = [];
   clearMsgs();
   showScreen('waitScreen');
   isSearching = true;
   socket.emit('skip');
-  showPopunderOnChatEnd(); // skip = chat end
 }
-
 function leaveChat() {
   isConnected = false; sharedKey = '';
   hideTyping();
-  clearChatSession(); // match end
+  clearChatSession();
   document.getElementById('discBar').classList.add('show');
   document.getElementById('msgInput').disabled = true;
-  addSys('👋 Tumne chat chhod di — koi data save nahi hua');
+  addSys('👋 Tumne chat chhod di');
   socket.emit('skip');
-  showPopunderOnChatEnd();
 }
 
-// ══════════════════════════════════
-//  MESSAGES
-// ══════════════════════════════════
+// MESSAGES
 function addSys(text) {
   const msgs = document.getElementById('msgs');
   const tr = document.getElementById('typingRow');
@@ -818,7 +538,6 @@ function addSys(text) {
   msgs.insertBefore(d, tr);
   msgs.scrollTop = msgs.scrollHeight;
 }
-
 function addMsg(text, type, nick, ts) {
   const msgs = document.getElementById('msgs');
   const tr = document.getElementById('typingRow');
@@ -832,7 +551,6 @@ function addMsg(text, type, nick, ts) {
   msgs.insertBefore(d, tr);
   msgs.scrollTop = msgs.scrollHeight;
 }
-
 function addImgMsg(src, type, nick, ts) {
   const msgs = document.getElementById('msgs');
   const tr = document.getElementById('typingRow');
@@ -851,22 +569,18 @@ function addImgMsg(src, type, nick, ts) {
   img.addEventListener('click', () => openLightbox(src));
   msgs.scrollTop = msgs.scrollHeight;
 }
-
 function clearMsgs() {
   const msgs = document.getElementById('msgs');
   const t = document.getElementById('typingRow');
   msgs.innerHTML = ''; msgs.appendChild(t);
 }
-
 function escHtml(t) {
   const d = document.createElement('div');
   d.appendChild(document.createTextNode(t));
   return d.innerHTML;
 }
 
-// ══════════════════════════════════
-//  SEND
-// ══════════════════════════════════
+// SEND
 function sendMsg() {
   if (!isConnected || !socket) return;
   const inp = document.getElementById('msgInput');
@@ -879,7 +593,6 @@ function sendMsg() {
   inp.value = ''; inp.style.height = 'auto';
   socket.emit('typing', false);
 }
-
 function sendImage(e) {
   if (!isConnected || !socket) return;
   const file = e.target.files[0];
@@ -893,32 +606,26 @@ function sendImage(e) {
   reader.readAsDataURL(file);
   e.target.value = '';
 }
-
 function handleKey(e) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
 }
-
 function autoResize(el) {
   el.style.height = 'auto';
   el.style.height = Math.min(el.scrollHeight, 78) + 'px';
 }
-
 function onTyping() {
   if (!isConnected || !socket) return;
   socket.emit('typing', true);
   clearTimeout(typingTimer);
   typingTimer = setTimeout(() => socket.emit('typing', false), 2000);
 }
-
 function showTyping() {
   document.getElementById('typingRow').classList.add('show');
   document.getElementById('msgs').scrollTop = 99999;
 }
 function hideTyping() { document.getElementById('typingRow').classList.remove('show'); }
 
-// ══════════════════════════════════
-//  LIGHTBOX
-// ══════════════════════════════════
+// LIGHTBOX
 function openLightbox(src) {
   document.getElementById('lbImg').src = src;
   document.getElementById('lightbox').classList.add('show');
@@ -934,9 +641,7 @@ document.getElementById('lightbox').addEventListener('click', function(e) {
   if (e.target === this) closeLightbox();
 });
 
-// ══════════════════════════════════
-//  TOAST
-// ══════════════════════════════════
+// TOAST
 let toastTimer = null;
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -946,33 +651,10 @@ function showToast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// ══════════════════════════════════
-//  NATIVE BANNER — sirf ek, waiting par load, match par remove
-// ══════════════════════════════════
-let nativeBannerLoaded = false;
-function loadNativeBanner() {
-  if (nativeBannerLoaded) return;
-  nativeBannerLoaded = true;
-  const s = document.createElement('script');
-  s.async = true;
-  s.setAttribute('data-cfasync', 'false');
-  s.src = 'https://pl29319176.profitablecpmratenetwork.com/8cb9a9839af7f86265b99f5eb289086a/invoke.js';
-  document.getElementById('nativeBannerWrap').appendChild(s);
-}
-function removeNativeBanner() {
-  const wrap = document.getElementById('nativeBannerWrap');
-  if (wrap) wrap.innerHTML = '';
-  nativeBannerLoaded = false;
-}
+// INIT
 document.getElementById('nickInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') startSearch();
 });
-
-// Tokens load karo
-updateTokenUI();
-// Timer refresh karo har minute
-setInterval(updateTokenUI, 60000);
-
 initSocket();
 </script>
 </body>
