@@ -56,7 +56,18 @@ body::before{content:'';position:fixed;inset:0;
   padding:11px 13px;color:var(--text);font-family:'Space Mono',monospace;font-size:14px;outline:none;
   transition:border-color .2s;margin-bottom:13px;}
 .nick-input:focus{border-color:var(--accent);}
-.gender-section,.pref-section{margin-bottom:13px;}
+
+/* Country select */
+.country-select{width:100%;background:var(--surface);border:1px solid var(--border2);
+  border-radius:10px;padding:11px 13px;color:var(--text);font-family:'Space Mono',monospace;
+  font-size:13px;outline:none;margin-bottom:13px;cursor:pointer;
+  -webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%235a6480' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 13px center;padding-right:36px;}
+.country-select:focus{border-color:var(--accent);}
+.country-select option{background:var(--card);color:var(--text);}
+
+.gender-section,.pref-section,.country-section{margin-bottom:13px;}
 .gender-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
 .pref-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
 .gender-btn,.pref-btn{background:var(--surface);border:1.5px solid var(--border2);border-radius:10px;
@@ -121,6 +132,7 @@ body::before{content:'';position:fixed;inset:0;
 @keyframes pdot{0%,100%{opacity:1;}50%{opacity:.4;}}
 .enc-badge{background:rgba(34,211,160,.08);border:1px solid rgba(34,211,160,.2);
   border-radius:8px;padding:1px 5px;font-size:9px;color:var(--green);}
+.country-flag{font-size:13px;}
 .header-btns{display:flex;gap:5px;flex-shrink:0;}
 .hbtn{width:32px;height:32px;border-radius:8px;background:transparent;border:1px solid var(--border2);
   color:var(--muted);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
@@ -212,29 +224,33 @@ body::before{content:'';position:fixed;inset:0;
     <div class="ob-logo-title">AnonChat</div>
     <div class="ob-logo-sub">// safe · anonymous · encrypted //</div>
   </div>
+
   <div class="safety-banner">
-    <div class="safety-title">🛡️ Safety Guidelines</div>
+    <div class="safety-title">🛡️ Safety Guidelines — Please Read</div>
     <ul class="safety-rules">
-      <li>Real naam, phone, address KABHI share mat karo</li>
-      <li>Kisi ke pressure mein photos mat bhejo</li>
-      <li>Suspicious lage toh turant Skip karo</li>
-      <li>Messages encrypted — server pe kuch save nahi hota</li>
-      <li>18+ content strictly forbidden</li>
+      <li>NEVER share your real name, phone number, address or any personal info</li>
+      <li>Do NOT send photos or videos under anyone's pressure</li>
+      <li>If someone seems suspicious, Skip immediately — no explanation needed</li>
+      <li>All messages are encrypted — nothing is stored on the server</li>
+      <li>18+ content is strictly forbidden</li>
     </ul>
   </div>
+
   <div class="ob-card">
-    <div class="field-label">Apna Nickname</div>
+    <div class="field-label">Your Nickname</div>
     <input class="nick-input" id="nickInput" type="text" placeholder="Anonymous_Rider" maxlength="20"/>
+
     <div class="gender-section">
-      <div class="field-label">Main Hoon</div>
+      <div class="field-label">I Am</div>
       <div class="gender-grid">
         <button class="gender-btn male" onclick="selectGender('male',this)"><span class="g-icon">♂️</span>Male</button>
         <button class="gender-btn female" onclick="selectGender('female',this)"><span class="g-icon">♀️</span>Female</button>
         <button class="gender-btn other" onclick="selectGender('other',this)"><span class="g-icon">⚧️</span>Other</button>
       </div>
     </div>
+
     <div class="pref-section">
-      <div class="field-label">Kisse Baat Karni Hai?</div>
+      <div class="field-label">I Want to Talk to</div>
       <div class="pref-grid">
         <button class="pref-btn" onclick="selectPref('male',this)"><span class="p-icon">♂️</span>Male</button>
         <button class="pref-btn" onclick="selectPref('female',this)"><span class="p-icon">♀️</span>Female</button>
@@ -242,19 +258,52 @@ body::before{content:'';position:fixed;inset:0;
         <button class="pref-btn active" onclick="selectPref('any',this)"><span class="p-icon">🎲</span>Anyone</button>
       </div>
     </div>
-    <button class="btn-start" onclick="startSearch()">🔀 Random Se Connect Karo</button>
+
+    <div class="country-section">
+      <div class="field-label">My Country</div>
+      <select class="country-select" id="countrySelect">
+        <option value="any">🌍 Any Country</option>
+        <option value="IN">🇮🇳 India</option>
+        <option value="US">🇺🇸 United States</option>
+        <option value="GB">🇬🇧 United Kingdom</option>
+        <option value="PK">🇵🇰 Pakistan</option>
+        <option value="BD">🇧🇩 Bangladesh</option>
+        <option value="NG">🇳🇬 Nigeria</option>
+        <option value="PH">🇵🇭 Philippines</option>
+        <option value="ID">🇮🇩 Indonesia</option>
+        <option value="BR">🇧🇷 Brazil</option>
+        <option value="MX">🇲🇽 Mexico</option>
+        <option value="TR">🇹🇷 Turkey</option>
+        <option value="EG">🇪🇬 Egypt</option>
+        <option value="SA">🇸🇦 Saudi Arabia</option>
+        <option value="AE">🇦🇪 UAE</option>
+        <option value="CA">🇨🇦 Canada</option>
+        <option value="AU">🇦🇺 Australia</option>
+        <option value="DE">🇩🇪 Germany</option>
+        <option value="FR">🇫🇷 France</option>
+        <option value="IT">🇮🇹 Italy</option>
+        <option value="RU">🇷🇺 Russia</option>
+        <option value="JP">🇯🇵 Japan</option>
+        <option value="KR">🇰🇷 South Korea</option>
+        <option value="NP">🇳🇵 Nepal</option>
+        <option value="LK">🇱🇰 Sri Lanka</option>
+        <option value="other">🌐 Other</option>
+      </select>
+    </div>
+
+    <button class="btn-start" onclick="startSearch()">🔀 Connect with a Random Stranger</button>
   </div>
-  <div class="enc-note">🔒 End-to-end <span>encrypted</span> — Zero logs</div>
+  <div class="enc-note">🔒 End-to-end <span>encrypted</span> — Zero logs, Zero storage</div>
 </div>
 
 <!-- WAITING -->
 <div class="screen hidden" id="waitScreen">
   <div class="wait-ring"><div class="wait-inner">👁️</div></div>
-  <div class="wait-title">Partner Dhundh Rahe Hain<span class="dots"><span>.</span><span>.</span><span>.</span></span></div>
-  <div class="wait-sub">Tumhari preference ke hisab se match ho raha hai</div>
-  <div class="wait-badge" id="waitBadge">🎲 Anyone ke saath</div>
+  <div class="wait-title">Finding a Partner<span class="dots"><span>.</span><span>.</span><span>.</span></span></div>
+  <div class="wait-sub">Matching based on your preferences</div>
+  <div class="wait-badge" id="waitBadge">🎲 Anyone</div>
   <button class="btn-cancel" onclick="cancelSearch()">✕ Cancel</button>
-  <!-- Native Banner — sirf waiting screen pe, sirf ek -->
+  <!-- Native Banner — only on waiting screen, only once -->
   <div class="native-banner-wrap" id="nativeBannerWrap">
     <div id="container-8cb9a9839af7f86265b99f5eb289086a"></div>
   </div>
@@ -272,14 +321,16 @@ body::before{content:'';position:fixed;inset:0;
       <div class="partner-meta">
         <div class="online-dot"></div>
         <span id="partnerGenderLabel">Online</span>
-        <div class="enc-badge">🔒 E2E</div>
+        <span class="country-flag" id="partnerCountryFlag"></span>
+        <div class="enc-badge">🔒 Encrypted</div>
       </div>
     </div>
     <div class="header-btns">
-      <button class="hbtn" onclick="skipPartner()">🔀</button>
-      <button class="hbtn" onclick="leaveChat()">✕</button>
+      <button class="hbtn" onclick="skipPartner()" title="New Partner">🔀</button>
+      <button class="hbtn" onclick="leaveChat()" title="Leave">✕</button>
     </div>
   </div>
+
   <div class="msgs" id="msgs">
     <div class="typing-row" id="typingRow">
       <div class="typing-bubble">
@@ -287,14 +338,16 @@ body::before{content:'';position:fixed;inset:0;
       </div>
     </div>
   </div>
+
   <div class="disc-bar" id="discBar">
-    😞 Stranger ne chat chhod di
-    <button class="btn-renew" onclick="skipPartner()">Naya Dhundho</button>
+    😞 Stranger has left the chat
+    <button class="btn-renew" onclick="skipPartner()">Find New</button>
   </div>
+
   <div class="chat-footer">
     <button class="icon-btn" onclick="document.getElementById('fileInput').click()">📎</button>
     <input type="file" id="fileInput" accept="image/*" onchange="sendImage(event)">
-    <textarea class="msg-ta" id="msgInput" placeholder="Kuch bhi likho..."
+    <textarea class="msg-ta" id="msgInput" placeholder="Type anything..."
       rows="1" onkeydown="handleKey(event)" oninput="autoResize(this);onTyping();"></textarea>
     <button class="btn-send" onclick="sendMsg()">➤</button>
   </div>
@@ -306,7 +359,7 @@ body::before{content:'';position:fixed;inset:0;
     <button class="lb-close" id="lbCloseBtn">✕</button>
   </div>
   <img id="lbImg" src="" alt="image">
-  <div class="lb-hint">✕ dabao ya bahar tap karo</div>
+  <div class="lb-hint">Tap ✕ or outside to close</div>
 </div>
 
 <script>
@@ -327,7 +380,15 @@ function xorDecrypt(enc, key) {
   } catch { return enc; }
 }
 
-// NATIVE BANNER — sirf ek baar load, match hone par remove
+// COUNTRY FLAGS MAP
+const countryFlags = {
+  IN:'🇮🇳',US:'🇺🇸',GB:'🇬🇧',PK:'🇵🇰',BD:'🇧🇩',NG:'🇳🇬',PH:'🇵🇭',
+  ID:'🇮🇩',BR:'🇧🇷',MX:'🇲🇽',TR:'🇹🇷',EG:'🇪🇬',SA:'🇸🇦',AE:'🇦🇪',
+  CA:'🇨🇦',AU:'🇦🇺',DE:'🇩🇪',FR:'🇫🇷',IT:'🇮🇹',RU:'🇷🇺',JP:'🇯🇵',
+  KR:'🇰🇷',NP:'🇳🇵',LK:'🇱🇰',other:'🌐',any:'🌍'
+};
+
+// NATIVE BANNER
 let nativeBannerLoaded = false;
 function loadNativeBanner() {
   if (nativeBannerLoaded) return;
@@ -364,6 +425,7 @@ function saveMsgToSession(obj) {
 let socket = null;
 let myNick = 'Anonymous';
 let myGender = '';
+let myCountry = 'any';
 let prefGender = 'any';
 let sharedKey = '';
 let isConnected = false;
@@ -374,21 +436,21 @@ let typingTimer = null;
 function initSocket() {
   const BACKEND_URL = 'https://anonchat-06dg.onrender.com';
   socket = io(BACKEND_URL, {
-    transports: ['websocket', 'polling']
+    transports: ['websocket', 'polling'],
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000
   });
 
-  socket.on('connect', () => {
-    setConnStatus(true);
-    restoreSession();
-  });
+  socket.on('connect', () => { setConnStatus(true); restoreSession(); });
   socket.on('disconnect', () => {
     setConnStatus(false);
-    if (isConnected) addSys('⚠️ Server se connection toot gaya — refresh karo');
+    if (isConnected) addSys('⚠️ Connection lost — please refresh');
   });
   socket.on('waiting', ({ position }) => {
-    document.getElementById('waitBadge').textContent = `⏳ ${position} log wait kar rahe hain`;
+    document.getElementById('waitBadge').textContent = `⏳ ${position} people waiting`;
   });
-  socket.on('matched', ({ partnerNick, partnerGender, sharedKey: key }) => {
+  socket.on('matched', ({ partnerNick, partnerGender, partnerCountry, sharedKey: key }) => {
     if (!isSearching) { socket.emit('cancelSearch'); return; }
     isSearching = false;
     sharedKey = key;
@@ -404,6 +466,7 @@ function initSocket() {
     document.getElementById('genderBadge').textContent = gI[partnerGender] || '?';
     document.getElementById('partnerName').textContent = partnerNick;
     document.getElementById('partnerGenderLabel').textContent = gL[partnerGender] || 'Online';
+    document.getElementById('partnerCountryFlag').textContent = countryFlags[partnerCountry] || '';
 
     clearMsgs();
     document.getElementById('discBar').classList.remove('show');
@@ -411,10 +474,10 @@ function initSocket() {
     showScreen('chatScreen');
     removeNativeBanner();
 
-    saveChatSession({ partnerNick, partnerGender, sharedKey: key, myNick, myGender, messages: [] });
-    addSys('✅ ' + partnerNick + ' (' + (gE[partnerGender]||'') + ') se connect hua!');
-    addSys('🔒 Messages encrypted — koi data save nahi hota');
-    addSys('⚠️ Personal info share mat karo!');
+    saveChatSession({ partnerNick, partnerGender, partnerCountry, sharedKey: key, myNick, myGender, messages: [] });
+    addSys('✅ Connected with ' + partnerNick + ' ' + (gE[partnerGender]||'') + ' ' + (countryFlags[partnerCountry]||''));
+    addSys('🔒 Messages are encrypted — no data is stored');
+    addSys('⚠️ Do not share personal information!');
   });
   socket.on('receiveMessage', ({ text, senderNick, timestamp }) => {
     hideTyping();
@@ -433,7 +496,7 @@ function initSocket() {
     hideTyping();
     document.getElementById('discBar').classList.add('show');
     document.getElementById('msgInput').disabled = true;
-    addSys('👋 Stranger ne chat chhod di');
+    addSys('👋 Stranger has left — no data was saved');
     clearChatSession();
   });
 }
@@ -455,6 +518,7 @@ function restoreSession() {
   document.getElementById('genderBadge').textContent = gI[pg] || '?';
   document.getElementById('partnerName').textContent = session.partnerNick;
   document.getElementById('partnerGenderLabel').textContent = gL[pg] || 'Online';
+  document.getElementById('partnerCountryFlag').textContent = countryFlags[session.partnerCountry] || '';
 
   clearMsgs();
   showScreen('chatScreen');
@@ -466,7 +530,7 @@ function restoreSession() {
       else addMsg(m.text, m.type, m.nick, m.ts);
     });
   }
-  addSys('🔄 Session restore hua — partner shayad disconnect ho gaya ho');
+  addSys('🔄 Session restored — partner may have disconnected');
   document.getElementById('discBar').classList.add('show');
   document.getElementById('msgInput').disabled = true;
 }
@@ -495,16 +559,21 @@ function selectPref(p, el) {
   prefGender = p;
 }
 function startSearch() {
-  if (!myGender) { alert('Pehle apna gender select karo!'); return; }
-  if (!socket || !socket.connected) { alert('Server se connect nahi! Refresh karo.'); return; }
+  if (!myGender) { alert('Please select your gender first!'); return; }
+  if (!socket || !socket.connected) { alert('Not connected to server! Please refresh.'); return; }
   myNick = document.getElementById('nickInput').value.trim() || 'Anonymous';
-  const L = {male:'♂️ Male ke saath',female:'♀️ Female ke saath',other:'⚧️ Other ke saath',any:'🎲 Anyone ke saath'};
-  document.getElementById('waitBadge').textContent = L[prefGender] || '🎲 Anyone';
-  clearChatSession();
-  chatMessages = [];
+  myCountry = document.getElementById('countrySelect').value;
+
+  const prefLabels = {
+    male:'♂️ Male', female:'♀️ Female', other:'⚧️ Other', any:'🎲 Anyone'
+  };
+  const countryLabel = myCountry !== 'any' ? ' · ' + (countryFlags[myCountry]||'') : '';
+  document.getElementById('waitBadge').textContent = (prefLabels[prefGender]||'Anyone') + countryLabel;
+
+  clearChatSession(); chatMessages = [];
   showScreen('waitScreen');
   isSearching = true;
-  socket.emit('findPartner', { nick: myNick, gender: myGender, pref: prefGender });
+  socket.emit('findPartner', { nick: myNick, gender: myGender, pref: prefGender, country: myCountry });
 }
 function cancelSearch() {
   isSearching = false;
@@ -525,7 +594,7 @@ function leaveChat() {
   clearChatSession();
   document.getElementById('discBar').classList.add('show');
   document.getElementById('msgInput').disabled = true;
-  addSys('👋 Tumne chat chhod di');
+  addSys('👋 You left the chat — no data was saved');
   socket.emit('skip');
 }
 
