@@ -1,730 +1,158 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>AnonChat — Safe & Anonymous</title>
-<script src="/socket.io/socket.io.js"></script>
-<!-- Adsterra Social Bar -->
-<script src="https://pl29314364.profitablecpmratenetwork.com/2b/c0/8a/2bc08a101d0d4a1068afd453820f01a5.js"></script>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
-:root{
-  --bg:#080b12;--surface:#0d1017;--card:#111520;--card2:#151a28;
-  --border:#1e2535;--border2:#252d40;
-  --accent-m:#4f9eff;--accent-f:#ff6eb4;--accent-a:#a78bfa;
-  --accent:#4f9eff;--green:#22d3a0;--red:#ff4d6a;
-  --text:#dde4f0;--muted:#5a6480;--muted2:#8899bb;
-}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;}
-body::before{content:'';position:fixed;inset:0;
-  background:radial-gradient(ellipse 70% 50% at 15% 10%,rgba(79,158,255,.06) 0%,transparent 60%),
-    radial-gradient(ellipse 60% 60% at 85% 90%,rgba(167,139,250,.06) 0%,transparent 60%);
-  pointer-events:none;z-index:0;}
-
-/* SCREENS */
-.screen{position:fixed;inset:0;display:flex;flex-direction:column;
-  align-items:center;justify-content:flex-start;z-index:1;overflow-y:auto;
-  padding:20px 16px 80px;transition:opacity .3s,transform .3s;}
-.screen.hidden{opacity:0;pointer-events:none;transform:scale(.97);display:none !important;}
-
-/* ONBOARD */
-#onboardScreen{justify-content:flex-start;gap:12px;padding-top:16px;}
-.ob-logo{text-align:center;width:100%;}
-.ob-logo-icon{font-size:40px;display:block;margin-bottom:4px;
-  filter:drop-shadow(0 0 14px rgba(79,158,255,.5));animation:float 3s ease-in-out infinite;}
-@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
-.ob-logo-title{font-size:32px;font-weight:800;letter-spacing:-1px;
-  background:linear-gradient(135deg,#4f9eff,#a78bfa,#ff6eb4);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.ob-logo-sub{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:2px;margin-top:2px;}
-
-.safety-banner{width:100%;max-width:460px;
-  background:rgba(255,77,106,.07);border:1px solid rgba(255,77,106,.22);
-  border-radius:13px;padding:11px 13px;}
-.safety-title{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:#ff4d6a;margin-bottom:6px;}
-.safety-rules{list-style:none;display:flex;flex-direction:column;gap:4px;}
-.safety-rules li{display:flex;align-items:flex-start;gap:7px;font-size:11px;color:var(--muted2);
-  font-family:'Space Mono',monospace;line-height:1.4;}
-.safety-rules li::before{content:'⚠';color:#ff4d6a;flex-shrink:0;}
-
-.ob-card{width:100%;max-width:460px;background:var(--card);border:1px solid var(--border2);border-radius:17px;padding:18px;}
-.field-label{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;
-  letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px;}
-.nick-input{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:10px;
-  padding:11px 13px;color:var(--text);font-family:'Space Mono',monospace;font-size:14px;outline:none;
-  transition:border-color .2s;margin-bottom:13px;}
-.nick-input:focus{border-color:var(--accent);}
-
-/* Country select */
-.country-select{width:100%;background:var(--surface);border:1px solid var(--border2);
-  border-radius:10px;padding:11px 13px;color:var(--text);font-family:'Space Mono',monospace;
-  font-size:13px;outline:none;margin-bottom:13px;cursor:pointer;
-  -webkit-appearance:none;appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%235a6480' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 13px center;padding-right:36px;}
-.country-select:focus{border-color:var(--accent);}
-.country-select option{background:var(--card);color:var(--text);}
-
-.gender-section,.pref-section,.country-section{margin-bottom:13px;}
-.gender-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
-.pref-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
-.gender-btn,.pref-btn{background:var(--surface);border:1.5px solid var(--border2);border-radius:10px;
-  padding:9px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;
-  color:var(--muted2);font-family:'Syne',sans-serif;font-size:11px;font-weight:600;transition:all .2s;}
-.gender-btn .g-icon,.pref-btn .p-icon{font-size:18px;}
-.gender-btn.male.active{border-color:var(--accent-m);background:rgba(79,158,255,.1);color:var(--accent-m);}
-.gender-btn.female.active{border-color:var(--accent-f);background:rgba(255,110,180,.1);color:var(--accent-f);}
-.gender-btn.other.active{border-color:var(--accent-a);background:rgba(167,139,250,.1);color:var(--accent-a);}
-.pref-btn.active{border-color:var(--green);background:rgba(34,211,160,.08);color:var(--green);}
-.btn-start{width:100%;padding:13px;background:linear-gradient(135deg,#4f9eff,#7c6bff);
-  border:none;border-radius:12px;color:#fff;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;
-  cursor:pointer;box-shadow:0 4px 18px rgba(79,158,255,.25);}
-.enc-note{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;text-align:center;}
-.enc-note span{color:var(--green);}
-
-/* WAITING */
-#waitScreen{justify-content:center;gap:16px;}
-.wait-ring{width:82px;height:82px;border-radius:50%;
-  border:2px solid transparent;border-top-color:var(--accent);border-right-color:rgba(79,158,255,.3);
-  animation:spin 1s linear infinite;display:flex;align-items:center;justify-content:center;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.wait-inner{font-size:26px;animation:spin 1s linear infinite reverse;}
-.wait-title{font-size:20px;font-weight:800;text-align:center;}
-.wait-sub{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;text-align:center;}
-.wait-badge{background:var(--card);border:1px solid var(--border2);border-radius:20px;
-  padding:6px 14px;font-size:12px;color:var(--muted2);font-family:'Space Mono',monospace;}
-.dots span{animation:blink 1.4s ease-in-out infinite;color:var(--accent);}
-.dots span:nth-child(2){animation-delay:.2s;}.dots span:nth-child(3){animation-delay:.4s;}
-@keyframes blink{0%,80%,100%{opacity:.2;}40%{opacity:1;}}
-.btn-cancel{padding:10px 24px;background:transparent;border:1px solid var(--border2);border-radius:10px;
-  color:var(--muted);font-family:'Syne',sans-serif;font-size:13px;cursor:pointer;}
-.native-banner-wrap{width:100%;max-width:420px;margin-top:8px;}
-
-/* CHAT SCREEN */
-#chatScreen{
-  position:fixed;top:0;left:0;right:0;bottom:0;
-  height:100vh;height:100dvh;
-  padding:0;align-items:stretch;justify-content:flex-start;
-  overflow:hidden;display:flex;flex-direction:column;z-index:10;
-}
-#chatScreen.hidden{display:none !important;}
-.chat-header{background:var(--card);border-bottom:1px solid var(--border);
-  padding:10px 13px;display:flex;align-items:center;gap:10px;flex-shrink:0;z-index:2;min-height:58px;}
-.avatar-wrap{position:relative;flex-shrink:0;}
-.partner-avatar{width:37px;height:37px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid transparent;}
-.avatar-wrap.male .partner-avatar{background:rgba(79,158,255,.15);border-color:rgba(79,158,255,.3);}
-.avatar-wrap.female .partner-avatar{background:rgba(255,110,180,.15);border-color:rgba(255,110,180,.3);}
-.avatar-wrap.other .partner-avatar{background:rgba(167,139,250,.15);border-color:rgba(167,139,250,.3);}
-.gender-badge{position:absolute;bottom:-2px;right:-2px;width:16px;height:16px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;font-size:9px;border:2px solid var(--card);}
-.avatar-wrap.male .gender-badge{background:var(--accent-m);}
-.avatar-wrap.female .gender-badge{background:var(--accent-f);}
-.avatar-wrap.other .gender-badge{background:var(--accent-a);}
-.partner-info{flex:1;min-width:0;}
-.partner-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.partner-meta{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);
-  font-family:'Space Mono',monospace;flex-wrap:wrap;margin-top:1px;}
-.online-dot{width:5px;height:5px;border-radius:50%;background:var(--green);
-  box-shadow:0 0 4px var(--green);flex-shrink:0;animation:pdot 2s ease-in-out infinite;}
-@keyframes pdot{0%,100%{opacity:1;}50%{opacity:.4;}}
-.enc-badge{background:rgba(34,211,160,.08);border:1px solid rgba(34,211,160,.2);
-  border-radius:8px;padding:1px 5px;font-size:9px;color:var(--green);}
-.country-flag{font-size:13px;}
-.header-btns{display:flex;gap:5px;flex-shrink:0;}
-.hbtn{width:32px;height:32px;border-radius:8px;background:transparent;border:1px solid var(--border2);
-  color:var(--muted);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
-.msgs{flex:1;min-height:0;overflow-y:scroll;-webkit-overflow-scrolling:touch;
-  overscroll-behavior:contain;padding:12px 13px 8px;display:flex;flex-direction:column;gap:7px;}
-.sys-msg{align-self:center;text-align:center;font-size:11px;color:var(--muted);
-  font-family:'Space Mono',monospace;padding:5px 12px;
-  background:rgba(255,255,255,.02);border:1px solid var(--border);
-  border-radius:18px;max-width:92%;word-break:break-word;}
-.message{max-width:78%;}
-.message.self{align-self:flex-end;}.message.other{align-self:flex-start;}
-.msg-bubble{padding:9px 13px;border-radius:16px;font-size:14px;line-height:1.5;word-break:break-word;}
-.message.self .msg-bubble{background:linear-gradient(135deg,rgba(79,158,255,.18),rgba(124,107,255,.12));
-  border:1px solid rgba(79,158,255,.22);border-bottom-right-radius:3px;}
-.message.other .msg-bubble{background:var(--card2);border:1px solid var(--border2);border-bottom-left-radius:3px;}
-.msg-img{max-width:200px;max-height:180px;border-radius:10px;cursor:pointer;display:block;border:1px solid var(--border2);}
-.msg-meta{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;
-  margin-top:3px;padding:0 2px;display:flex;align-items:center;gap:4px;}
-.message.self .msg-meta{justify-content:flex-end;}
-.enc-tag{font-size:9px;color:var(--green);}
-.typing-row{display:none;align-self:flex-start;}
-.typing-row.show{display:flex;}
-.typing-bubble{background:var(--card2);border:1px solid var(--border2);
-  border-radius:16px;border-bottom-left-radius:3px;padding:10px 13px;display:flex;gap:4px;align-items:center;}
-.t-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:bounce 1.2s ease-in-out infinite;}
-.t-dot:nth-child(2){animation-delay:.2s;}.t-dot:nth-child(3){animation-delay:.4s;}
-@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.4;}30%{transform:translateY(-5px);opacity:1;}}
-.disc-bar{display:none;background:rgba(255,77,106,.07);border-top:1px solid rgba(255,77,106,.2);
-  padding:9px 13px;align-items:center;justify-content:center;gap:10px;
-  font-size:12px;color:var(--red);font-family:'Space Mono',monospace;flex-shrink:0;}
-.disc-bar.show{display:flex;}
-.btn-renew{padding:5px 12px;background:rgba(255,77,106,.12);border:1px solid rgba(255,77,106,.3);
-  border-radius:7px;color:var(--red);font-family:'Syne',sans-serif;font-size:12px;cursor:pointer;}
-.chat-footer{background:var(--card);border-top:1px solid var(--border);
-  padding:9px 11px;padding-bottom:max(9px,env(safe-area-inset-bottom));
-  display:flex;gap:7px;align-items:flex-end;flex-shrink:0;}
-.icon-btn{width:37px;height:37px;border-radius:9px;background:var(--surface);
-  border:1px solid var(--border2);color:var(--muted);cursor:pointer;font-size:16px;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-#fileInput{display:none;}
-.msg-ta{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:11px;
-  padding:9px 12px;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;
-  outline:none;resize:none;max-height:78px;min-height:38px;line-height:1.4;
-  transition:border-color .2s;overflow-y:auto;}
-.msg-ta:focus{border-color:rgba(79,158,255,.4);}
-.msg-ta::placeholder{color:var(--muted);}
-.btn-send{width:38px;height:38px;border-radius:10px;flex-shrink:0;
-  background:linear-gradient(135deg,#4f9eff,#7c6bff);border:none;color:#fff;
-  font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.conn-status{position:fixed;top:8px;right:8px;z-index:50;font-size:10px;
-  font-family:'Space Mono',monospace;background:var(--card);border:1px solid var(--border2);
-  border-radius:16px;padding:4px 9px;display:flex;align-items:center;gap:5px;}
-.conn-dot{width:5px;height:5px;border-radius:50%;}
-.conn-status.online .conn-dot{background:var(--green);box-shadow:0 0 4px var(--green);}
-.conn-status.offline .conn-dot{background:var(--red);}
-.conn-status.online{color:var(--green);}.conn-status.offline{color:var(--red);}
-.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:500;
-  flex-direction:column;align-items:center;justify-content:center;gap:14px;}
-.lightbox.show{display:flex;}
-.lb-topbar{display:flex;align-items:center;justify-content:flex-end;width:94vw;}
-.lb-close{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.14);
-  border:1.5px solid rgba(255,255,255,.22);color:#fff;font-size:20px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;font-weight:700;}
-.lightbox img{max-width:94vw;max-height:76vh;border-radius:10px;display:block;object-fit:contain;}
-.lb-hint{font-size:11px;color:rgba(255,255,255,.28);font-family:'Space Mono',monospace;}
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);
-  background:var(--card);border:1px solid var(--border2);border-radius:12px;
-  padding:10px 18px;font-size:13px;font-family:'Space Mono',monospace;
-  color:var(--text);opacity:0;transition:all .3s;z-index:300;white-space:nowrap;pointer-events:none;}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-@media(max-width:400px){
-  .ob-logo-title{font-size:28px;}
-  .pref-grid{grid-template-columns:repeat(2,1fr);}
-  .message{max-width:88%;}
-}
-</style>
-</head>
-<body>
-
-<div class="conn-status offline" id="connStatus">
-  <div class="conn-dot"></div><span id="connLabel">Connecting...</span>
-</div>
-<div class="toast" id="toast"></div>
-
-<!-- ONBOARD -->
-<div class="screen" id="onboardScreen">
-  <div class="ob-logo">
-    <span class="ob-logo-icon">🔐</span>
-    <div class="ob-logo-title">AnonChat</div>
-    <div class="ob-logo-sub">// safe · anonymous · encrypted //</div>
-  </div>
-
-  <div class="safety-banner">
-    <div class="safety-title">🛡️ Safety Guidelines — Please Read</div>
-    <ul class="safety-rules">
-      <li>NEVER share your real name, phone number, address or any personal info</li>
-      <li>Do NOT send photos or videos under anyone's pressure</li>
-      <li>If someone seems suspicious, Skip immediately — no explanation needed</li>
-      <li>All messages are encrypted — nothing is stored on the server</li>
-      <li>18+ content is strictly forbidden</li>
-    </ul>
-  </div>
-
-  <div class="ob-card">
-    <div class="field-label">Your Nickname</div>
-    <input class="nick-input" id="nickInput" type="text" placeholder="Anonymous_Rider" maxlength="20"/>
-
-    <div class="gender-section">
-      <div class="field-label">I Am</div>
-      <div class="gender-grid">
-        <button class="gender-btn male" onclick="selectGender('male',this)"><span class="g-icon">♂️</span>Male</button>
-        <button class="gender-btn female" onclick="selectGender('female',this)"><span class="g-icon">♀️</span>Female</button>
-        <button class="gender-btn other" onclick="selectGender('other',this)"><span class="g-icon">⚧️</span>Other</button>
-      </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TalkStrangr — Random Anonymous Chat</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- ============ TOP AD BANNER (Google AdSense slot goes here later) ============ -->
+    <div class="ad-slot ad-top" id="adTop">
+      <span class="ad-label">Advertisement</span>
     </div>
 
-    <div class="pref-section">
-      <div class="field-label">I Want to Talk to</div>
-      <div class="pref-grid">
-        <button class="pref-btn" onclick="selectPref('male',this)"><span class="p-icon">♂️</span>Male</button>
-        <button class="pref-btn" onclick="selectPref('female',this)"><span class="p-icon">♀️</span>Female</button>
-        <button class="pref-btn" onclick="selectPref('other',this)"><span class="p-icon">⚧️</span>Other</button>
-        <button class="pref-btn active" onclick="selectPref('any',this)"><span class="p-icon">🎲</span>Anyone</button>
-      </div>
+    <div class="app-wrapper">
+      <!-- ============ LANDING / HOME SCREEN ============ -->
+      <section id="homeScreen" class="screen home-screen">
+        <div class="home-card">
+          <div class="brand">
+            <span class="brand-dot"></span>
+            <h1>TalkStrangr</h1>
+          </div>
+          <p class="tagline">
+            Talk to a random stranger. No sign-up. No names. Just chat.
+          </p>
+
+          <div class="online-counter">
+            <span class="pulse-dot"></span>
+            <span id="onlineCountText">Connecting…</span>
+          </div>
+
+          <div class="filter-block">
+            <label class="filter-label">You are</label>
+            <div class="chip-group" id="genderGroup">
+              <button type="button" class="chip" data-gender="male">
+                Male
+              </button>
+              <button type="button" class="chip" data-gender="female">
+                Female
+              </button>
+              <button type="button" class="chip" data-gender="other">
+                Other
+              </button>
+            </div>
+
+            <label class="filter-label">Connect with</label>
+            <div class="chip-group" id="lookingForGroup">
+              <button type="button" class="chip" data-lookingfor="male">
+                Male
+              </button>
+              <button type="button" class="chip" data-lookingfor="female">
+                Female
+              </button>
+              <button type="button" class="chip active" data-lookingfor="any">
+                Anyone
+              </button>
+            </div>
+          </div>
+
+          <button id="startChatBtn" class="btn-primary">Start Chat</button>
+
+          <p class="safety-note">
+            ⚠️ Never share your phone number, address, passwords, or any
+            personal/financial details with strangers. Stay anonymous, stay
+            safe.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============ SEARCHING SCREEN ============ -->
+      <section id="searchScreen" class="screen search-screen hidden">
+        <div class="search-card">
+          <div class="spinner"></div>
+          <p id="searchStatusText">Looking for a stranger to chat with…</p>
+
+          <div id="timeoutBox" class="timeout-box hidden">
+            <p>
+              No match found with your filter yet. Want to widen your search?
+            </p>
+            <div class="timeout-actions">
+              <button id="switchAnyoneBtn" class="btn-secondary">
+                Connect with Anyone
+              </button>
+              <button id="keepWaitingBtn" class="btn-outline">
+                Keep Waiting
+              </button>
+            </div>
+          </div>
+
+          <button id="cancelSearchBtn" class="btn-text">Cancel</button>
+        </div>
+      </section>
+
+      <!-- ============ CHAT SCREEN ============ -->
+      <section id="chatScreen" class="screen chat-screen hidden">
+        <div class="chat-container">
+          <div class="chat-header">
+            <div class="chat-header-left">
+              <span class="status-dot" id="statusDot"></span>
+              <span id="chatHeaderText">Connected with a stranger</span>
+            </div>
+            <div class="chat-header-right">
+              <button
+                id="reportBtn"
+                class="btn-icon"
+                title="Report this stranger"
+              >
+                🚩 Report
+              </button>
+            </div>
+          </div>
+
+          <p class="safety-strip">
+            ⚠️ Don't share personal info (phone, address, passwords, socials,
+            payment details).
+          </p>
+
+          <div id="messagesArea" class="messages-area"></div>
+
+          <div id="typingIndicator" class="typing-indicator hidden">
+            Stranger is typing…
+          </div>
+
+          <form id="messageForm" class="message-form" autocomplete="off">
+            <input
+              type="text"
+              id="messageInput"
+              class="message-input"
+              placeholder="Type a message…"
+              maxlength="1000"
+              disabled
+            />
+            <button type="submit" id="sendBtn" class="btn-send" disabled>
+              Send
+            </button>
+          </form>
+
+          <div class="chat-footer-actions">
+            <button id="nextBtn" class="btn-primary btn-next">
+              Next / Skip ▶
+            </button>
+            <button id="stopBtn" class="btn-outline">Stop Chat</button>
+          </div>
+        </div>
+      </section>
     </div>
 
-    <div class="country-section">
-      <div class="field-label">My Country</div>
-      <select class="country-select" id="countrySelect">
-        <option value="any">🌍 Any Country</option>
-        <option value="IN">🇮🇳 India</option>
-        <option value="US">🇺🇸 United States</option>
-        <option value="GB">🇬🇧 United Kingdom</option>
-        <option value="PK">🇵🇰 Pakistan</option>
-        <option value="BD">🇧🇩 Bangladesh</option>
-        <option value="NG">🇳🇬 Nigeria</option>
-        <option value="PH">🇵🇭 Philippines</option>
-        <option value="ID">🇮🇩 Indonesia</option>
-        <option value="BR">🇧🇷 Brazil</option>
-        <option value="MX">🇲🇽 Mexico</option>
-        <option value="TR">🇹🇷 Turkey</option>
-        <option value="EG">🇪🇬 Egypt</option>
-        <option value="SA">🇸🇦 Saudi Arabia</option>
-        <option value="AE">🇦🇪 UAE</option>
-        <option value="CA">🇨🇦 Canada</option>
-        <option value="AU">🇦🇺 Australia</option>
-        <option value="DE">🇩🇪 Germany</option>
-        <option value="FR">🇫🇷 France</option>
-        <option value="IT">🇮🇹 Italy</option>
-        <option value="RU">🇷🇺 Russia</option>
-        <option value="JP">🇯🇵 Japan</option>
-        <option value="KR">🇰🇷 South Korea</option>
-        <option value="NP">🇳🇵 Nepal</option>
-        <option value="LK">🇱🇰 Sri Lanka</option>
-        <option value="other">🌐 Other</option>
-      </select>
+    <!-- ============ BOTTOM AD BANNER (Google AdSense slot goes here later) ============ -->
+    <div class="ad-slot ad-bottom" id="adBottom">
+      <span class="ad-label">Advertisement</span>
     </div>
 
-    <button class="btn-start" onclick="startSearch()">🔀 Connect with a Random Stranger</button>
-  </div>
-  <div class="enc-note">🔒 End-to-end <span>encrypted</span> — Zero logs, Zero storage</div>
-</div>
+    <div id="toast" class="toast hidden"></div>
 
-<!-- WAITING -->
-<div class="screen hidden" id="waitScreen">
-  <div class="wait-ring"><div class="wait-inner">👁️</div></div>
-  <div class="wait-title">Finding a Partner<span class="dots"><span>.</span><span>.</span><span>.</span></span></div>
-  <div class="wait-sub">Matching based on your preferences</div>
-  <div class="wait-badge" id="waitBadge">🎲 Anyone</div>
-  <button class="btn-cancel" onclick="cancelSearch()">✕ Cancel</button>
-  <!-- Native Banner — only on waiting screen, only once -->
-  <div class="native-banner-wrap" id="nativeBannerWrap">
-    <div id="container-8cb9a9839af7f86265b99f5eb289086a"></div>
-  </div>
-</div>
-
-<!-- CHAT -->
-<div class="screen hidden" id="chatScreen">
-  <div class="chat-header">
-    <div class="avatar-wrap" id="avatarWrap">
-      <div class="partner-avatar" id="partnerAvatar">?</div>
-      <div class="gender-badge" id="genderBadge">♂</div>
-    </div>
-    <div class="partner-info">
-      <div class="partner-name" id="partnerName">Stranger</div>
-      <div class="partner-meta">
-        <div class="online-dot"></div>
-        <span id="partnerGenderLabel">Online</span>
-        <span class="country-flag" id="partnerCountryFlag"></span>
-        <div class="enc-badge">🔒 Encrypted</div>
-      </div>
-    </div>
-    <div class="header-btns">
-      <button class="hbtn" onclick="skipPartner()" title="New Partner">🔀</button>
-      <button class="hbtn" onclick="leaveChat()" title="Leave">✕</button>
-    </div>
-  </div>
-
-  <div class="msgs" id="msgs">
-    <div class="typing-row" id="typingRow">
-      <div class="typing-bubble">
-        <div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="disc-bar" id="discBar">
-    😞 Stranger has left the chat
-    <button class="btn-renew" onclick="skipPartner()">Find New</button>
-  </div>
-
-  <div class="chat-footer">
-    <button class="icon-btn" onclick="document.getElementById('fileInput').click()">📎</button>
-    <input type="file" id="fileInput" accept="image/*" onchange="sendImage(event)">
-    <textarea class="msg-ta" id="msgInput" placeholder="Type anything..."
-      rows="1" onkeydown="handleKey(event)" oninput="autoResize(this);onTyping();"></textarea>
-    <button class="btn-send" onclick="sendMsg()">➤</button>
-  </div>
-</div>
-
-<!-- LIGHTBOX -->
-<div class="lightbox" id="lightbox">
-  <div class="lb-topbar">
-    <button class="lb-close" id="lbCloseBtn">✕</button>
-  </div>
-  <img id="lbImg" src="" alt="image">
-  <div class="lb-hint">Tap ✕ or outside to close</div>
-</div>
-
-<script>
-// XOR ENCRYPTION
-function xorEncrypt(text, key) {
-  let r = '';
-  for (let i = 0; i < text.length; i++)
-    r += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-  return btoa(unescape(encodeURIComponent(r)));
-}
-function xorDecrypt(enc, key) {
-  try {
-    const t = decodeURIComponent(escape(atob(enc)));
-    let r = '';
-    for (let i = 0; i < t.length; i++)
-      r += String.fromCharCode(t.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-    return r;
-  } catch { return enc; }
-}
-
-// COUNTRY FLAGS MAP
-const countryFlags = {
-  IN:'🇮🇳',US:'🇺🇸',GB:'🇬🇧',PK:'🇵🇰',BD:'🇧🇩',NG:'🇳🇬',PH:'🇵🇭',
-  ID:'🇮🇩',BR:'🇧🇷',MX:'🇲🇽',TR:'🇹🇷',EG:'🇪🇬',SA:'🇸🇦',AE:'🇦🇪',
-  CA:'🇨🇦',AU:'🇦🇺',DE:'🇩🇪',FR:'🇫🇷',IT:'🇮🇹',RU:'🇷🇺',JP:'🇯🇵',
-  KR:'🇰🇷',NP:'🇳🇵',LK:'🇱🇰',other:'🌐',any:'🌍'
-};
-
-// NATIVE BANNER
-let nativeBannerLoaded = false;
-function loadNativeBanner() {
-  if (nativeBannerLoaded) return;
-  nativeBannerLoaded = true;
-  const s = document.createElement('script');
-  s.async = true;
-  s.setAttribute('data-cfasync', 'false');
-  s.src = 'https://pl29319176.profitablecpmratenetwork.com/8cb9a9839af7f86265b99f5eb289086a/invoke.js';
-  document.getElementById('nativeBannerWrap').appendChild(s);
-}
-function removeNativeBanner() {
-  const wrap = document.getElementById('nativeBannerWrap');
-  if (wrap) wrap.innerHTML = '';
-  nativeBannerLoaded = false;
-}
-
-// CHAT SESSION PERSISTENCE
-const CHAT_KEY = 'ac_chat_session';
-let chatMessages = [];
-function saveChatSession(data) {
-  try { sessionStorage.setItem(CHAT_KEY, JSON.stringify(data)); } catch(e) {}
-}
-function loadChatSession() {
-  try { const d = sessionStorage.getItem(CHAT_KEY); return d ? JSON.parse(d) : null; } catch(e) { return null; }
-}
-function clearChatSession() { sessionStorage.removeItem(CHAT_KEY); }
-function saveMsgToSession(obj) {
-  chatMessages.push(obj);
-  const s = loadChatSession();
-  if (s) { s.messages = chatMessages; saveChatSession(s); }
-}
-
-// STATE
-let socket = null;
-let myNick = 'Anonymous';
-let myGender = '';
-let myCountry = 'any';
-let prefGender = 'any';
-let sharedKey = '';
-let isConnected = false;
-let isSearching = false;
-let typingTimer = null;
-
-// SOCKET
-function initSocket() {
-  const BACKEND_URL = window.location.origin;
-  socket = io(BACKEND_URL, {
-    transports: ['websocket', 'polling'],
-    reconnection: true,
-    reconnectionAttempts: 5,
-    reconnectionDelay: 1000
-  });
-
-  socket.on('connect', () => { setConnStatus(true); restoreSession(); });
-  socket.on('disconnect', () => {
-    setConnStatus(false);
-    if (isConnected) addSys('⚠️ Connection lost — please refresh');
-  });
-  socket.on('waiting', ({ position }) => {
-    document.getElementById('waitBadge').textContent = `⏳ ${position} people waiting`;
-  });
-  socket.on('matched', ({ partnerNick, partnerGender, partnerCountry, sharedKey: key }) => {
-    if (!isSearching) { socket.emit('cancelSearch'); return; }
-    isSearching = false;
-    sharedKey = key;
-    isConnected = true;
-    chatMessages = [];
-
-    const gE = {male:'♂️',female:'♀️',other:'⚧️'};
-    const gI = {male:'♂',female:'♀',other:'⚧'};
-    const gL = {male:'Male • Online',female:'Female • Online',other:'Other • Online'};
-
-    document.getElementById('avatarWrap').className = 'avatar-wrap ' + partnerGender;
-    document.getElementById('partnerAvatar').textContent = gE[partnerGender] || '👤';
-    document.getElementById('genderBadge').textContent = gI[partnerGender] || '?';
-    document.getElementById('partnerName').textContent = partnerNick;
-    document.getElementById('partnerGenderLabel').textContent = gL[partnerGender] || 'Online';
-    document.getElementById('partnerCountryFlag').textContent = countryFlags[partnerCountry] || '';
-
-    clearMsgs();
-    document.getElementById('discBar').classList.remove('show');
-    document.getElementById('msgInput').disabled = false;
-    showScreen('chatScreen');
-    removeNativeBanner();
-
-    saveChatSession({ partnerNick, partnerGender, partnerCountry, sharedKey: key, myNick, myGender, messages: [] });
-    addSys('✅ Connected with ' + partnerNick + ' ' + (gE[partnerGender]||'') + ' ' + (countryFlags[partnerCountry]||''));
-    addSys('🔒 Messages are encrypted — no data is stored');
-    addSys('⚠️ Do not share personal information!');
-  });
-  socket.on('receiveMessage', ({ text, senderNick, timestamp }) => {
-    hideTyping();
-    const dec = sharedKey ? xorDecrypt(text, sharedKey) : text;
-    addMsg(dec, 'other', senderNick, timestamp);
-    saveMsgToSession({type:'other', text:dec, nick:senderNick, ts:timestamp});
-  });
-  socket.on('receiveImage', ({ imageData, senderNick, timestamp }) => {
-    hideTyping();
-    addImgMsg(imageData, 'other', senderNick, timestamp);
-    saveMsgToSession({type:'other', isImg:true, src:imageData, nick:senderNick, ts:timestamp});
-  });
-  socket.on('partnerTyping', v => v ? showTyping() : hideTyping());
-  socket.on('partnerLeft', () => {
-    isConnected = false; sharedKey = '';
-    hideTyping();
-    document.getElementById('discBar').classList.add('show');
-    document.getElementById('msgInput').disabled = true;
-    addSys('👋 Stranger has left — no data was saved');
-    clearChatSession();
-  });
-}
-
-function restoreSession() {
-  const session = loadChatSession();
-  if (!session) return;
-  sharedKey = session.sharedKey;
-  myNick = session.myNick || myNick;
-  isConnected = false;
-
-  const gE = {male:'♂️',female:'♀️',other:'⚧️'};
-  const gI = {male:'♂',female:'♀',other:'⚧'};
-  const gL = {male:'Male • Online',female:'Female • Online',other:'Other • Online'};
-  const pg = session.partnerGender;
-
-  document.getElementById('avatarWrap').className = 'avatar-wrap ' + pg;
-  document.getElementById('partnerAvatar').textContent = gE[pg] || '👤';
-  document.getElementById('genderBadge').textContent = gI[pg] || '?';
-  document.getElementById('partnerName').textContent = session.partnerNick;
-  document.getElementById('partnerGenderLabel').textContent = gL[pg] || 'Online';
-  document.getElementById('partnerCountryFlag').textContent = countryFlags[session.partnerCountry] || '';
-
-  clearMsgs();
-  showScreen('chatScreen');
-
-  if (session.messages && session.messages.length > 0) {
-    chatMessages = session.messages;
-    session.messages.forEach(m => {
-      if (m.isImg) addImgMsg(m.src, m.type, m.nick, m.ts);
-      else addMsg(m.text, m.type, m.nick, m.ts);
-    });
-  }
-  addSys('🔄 Session restored — partner may have disconnected');
-  document.getElementById('discBar').classList.add('show');
-  document.getElementById('msgInput').disabled = true;
-}
-
-function setConnStatus(online) {
-  document.getElementById('connStatus').className = 'conn-status ' + (online ? 'online' : 'offline');
-  document.getElementById('connLabel').textContent = online ? 'Connected' : 'Offline';
-}
-
-// SCREENS
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
-  if (id === 'waitScreen') loadNativeBanner();
-}
-
-// ONBOARD
-function selectGender(g, el) {
-  document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  myGender = g;
-}
-function selectPref(p, el) {
-  document.querySelectorAll('.pref-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  prefGender = p;
-}
-function startSearch() {
-  if (!myGender) { alert('Please select your gender first!'); return; }
-  if (!socket || !socket.connected) { alert('Not connected to server! Please refresh.'); return; }
-  myNick = document.getElementById('nickInput').value.trim() || 'Anonymous';
-  myCountry = document.getElementById('countrySelect').value;
-
-  const prefLabels = {
-    male:'♂️ Male', female:'♀️ Female', other:'⚧️ Other', any:'🎲 Anyone'
-  };
-  const countryLabel = myCountry !== 'any' ? ' · ' + (countryFlags[myCountry]||'') : '';
-  document.getElementById('waitBadge').textContent = (prefLabels[prefGender]||'Anyone') + countryLabel;
-
-  clearChatSession(); chatMessages = [];
-  showScreen('waitScreen');
-  isSearching = true;
-  socket.emit('findPartner', { nick: myNick, gender: myGender, pref: prefGender, country: myCountry });
-}
-function cancelSearch() {
-  isSearching = false;
-  socket.emit('cancelSearch');
-  showScreen('onboardScreen');
-}
-function skipPartner() {
-  isConnected = false; sharedKey = '';
-  clearChatSession(); chatMessages = [];
-  clearMsgs();
-  showScreen('waitScreen');
-  isSearching = true;
-  socket.emit('skip');
-}
-function leaveChat() {
-  isConnected = false; sharedKey = '';
-  hideTyping();
-  clearChatSession();
-  document.getElementById('discBar').classList.add('show');
-  document.getElementById('msgInput').disabled = true;
-  addSys('👋 You left the chat — no data was saved');
-  socket.emit('skip');
-}
-
-// MESSAGES
-function addSys(text) {
-  const msgs = document.getElementById('msgs');
-  const tr = document.getElementById('typingRow');
-  const d = document.createElement('div');
-  d.className = 'sys-msg'; d.textContent = text;
-  msgs.insertBefore(d, tr);
-  msgs.scrollTop = msgs.scrollHeight;
-}
-function addMsg(text, type, nick, ts) {
-  const msgs = document.getElementById('msgs');
-  const tr = document.getElementById('typingRow');
-  const t = ts ? new Date(ts) : new Date();
-  const time = t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');
-  const name = type === 'self' ? myNick : (nick || 'Stranger');
-  const d = document.createElement('div');
-  d.className = 'message ' + type;
-  d.innerHTML = `<div class="msg-bubble">${escHtml(text)}</div>
-    <div class="msg-meta"><span>${name} • ${time}</span><span class="enc-tag">🔒</span></div>`;
-  msgs.insertBefore(d, tr);
-  msgs.scrollTop = msgs.scrollHeight;
-}
-function addImgMsg(src, type, nick, ts) {
-  const msgs = document.getElementById('msgs');
-  const tr = document.getElementById('typingRow');
-  const t = ts ? new Date(ts) : new Date();
-  const time = t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');
-  const name = type === 'self' ? myNick : (nick || 'Stranger');
-  const uid = 'img' + Date.now() + Math.random().toString(36).slice(2,5);
-  const d = document.createElement('div');
-  d.className = 'message ' + type;
-  d.innerHTML = `<div class="msg-bubble" style="padding:5px;">
-    <img class="msg-img" id="${uid}" alt="photo"></div>
-    <div class="msg-meta"><span>${name} • ${time}</span><span class="enc-tag">🔒</span></div>`;
-  msgs.insertBefore(d, tr);
-  const img = document.getElementById(uid);
-  img.src = src;
-  img.addEventListener('click', () => openLightbox(src));
-  msgs.scrollTop = msgs.scrollHeight;
-}
-function clearMsgs() {
-  const msgs = document.getElementById('msgs');
-  const t = document.getElementById('typingRow');
-  msgs.innerHTML = ''; msgs.appendChild(t);
-}
-function escHtml(t) {
-  const d = document.createElement('div');
-  d.appendChild(document.createTextNode(t));
-  return d.innerHTML;
-}
-
-// SEND
-function sendMsg() {
-  if (!isConnected || !socket) return;
-  const inp = document.getElementById('msgInput');
-  const txt = inp.value.trim();
-  if (!txt) return;
-  const enc = sharedKey ? xorEncrypt(txt, sharedKey) : txt;
-  socket.emit('sendMessage', { text: txt, encryptedText: enc });
-  addMsg(txt, 'self', myNick);
-  saveMsgToSession({type:'self', text:txt, nick:myNick, ts:Date.now()});
-  inp.value = ''; inp.style.height = 'auto';
-  socket.emit('typing', false);
-}
-function sendImage(e) {
-  if (!isConnected || !socket) return;
-  const file = e.target.files[0];
-  if (!file || !file.type.startsWith('image/')) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    socket.emit('sendImage', { imageData: ev.target.result });
-    addImgMsg(ev.target.result, 'self', myNick);
-    saveMsgToSession({type:'self', isImg:true, src:ev.target.result, nick:myNick, ts:Date.now()});
-  };
-  reader.readAsDataURL(file);
-  e.target.value = '';
-}
-function handleKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
-}
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 78) + 'px';
-}
-function onTyping() {
-  if (!isConnected || !socket) return;
-  socket.emit('typing', true);
-  clearTimeout(typingTimer);
-  typingTimer = setTimeout(() => socket.emit('typing', false), 2000);
-}
-function showTyping() {
-  document.getElementById('typingRow').classList.add('show');
-  document.getElementById('msgs').scrollTop = 99999;
-}
-function hideTyping() { document.getElementById('typingRow').classList.remove('show'); }
-
-// LIGHTBOX
-function openLightbox(src) {
-  document.getElementById('lbImg').src = src;
-  document.getElementById('lightbox').classList.add('show');
-}
-function closeLightbox() {
-  document.getElementById('lightbox').classList.remove('show');
-  setTimeout(() => { document.getElementById('lbImg').src = ''; }, 300);
-}
-document.getElementById('lbCloseBtn').addEventListener('click', e => {
-  e.stopPropagation(); closeLightbox();
-});
-document.getElementById('lightbox').addEventListener('click', function(e) {
-  if (e.target === this) closeLightbox();
-});
-
-// TOAST
-let toastTimer = null;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
-}
-//kuchh nahi 
-// INIT
-document.getElementById('nickInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') startSearch();
-});
-initSocket();
-</script>
-</body>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="client.js"></script>
+  </body>
 </html>
