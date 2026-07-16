@@ -39,6 +39,7 @@
   var cancelSearchBtn = document.getElementById('cancelSearchBtn');
 
   var chatHeaderText = document.getElementById('chatHeaderText');
+  var genderBadge = document.getElementById('genderBadge');
   var statusDot = document.getElementById('statusDot');
   var reportBtn = document.getElementById('reportBtn');
   var messagesArea = document.getElementById('messagesArea');
@@ -190,12 +191,28 @@
     resetChatUI();
     showScreen(chatScreen);
     statusDot.classList.remove('offline');
-    var genderLabel = partnerGender === 'male' ? 'a guy' : partnerGender === 'female' ? 'a girl' : 'someone';
-    chatHeaderText.textContent = 'Connected with ' + genderLabel;
+    chatHeaderText.textContent = 'Connected with a stranger';
+    updateGenderBadge(partnerGender);
     appendMessage('You are now chatting with a random stranger. Say hi!', 'system');
     messageInput.disabled = false;
     sendBtn.disabled = false;
     messageInput.focus();
+  }
+
+  function updateGenderBadge(partnerGender) {
+    genderBadge.classList.remove('badge-male', 'badge-female', 'hidden');
+
+    if (partnerGender === 'male') {
+      genderBadge.textContent = 'M';
+      genderBadge.classList.add('badge-male');
+    } else if (partnerGender === 'female') {
+      genderBadge.textContent = 'F';
+      genderBadge.classList.add('badge-female');
+    } else {
+      // Other / unknown -> no badge, just the normal status text
+      genderBadge.textContent = '';
+      genderBadge.classList.add('hidden');
+    }
   }
 
   function exitChatMode(statusMessage) {
@@ -204,6 +221,7 @@
     messageInput.disabled = true;
     sendBtn.disabled = true;
     typingIndicator.classList.add('hidden');
+    genderBadge.classList.add('hidden');
     if (statusMessage) {
       appendMessage(statusMessage, 'system');
     }
