@@ -353,39 +353,109 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 18px;
+  gap: 8px;
+  padding: 8px 10px;
   border-bottom: 1px solid var(--border-subtle);
   background: var(--bg-card-2);
+  flex-shrink: 0;
 }
 
-.chat-header-left {
+.chat-status {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  font-size: 12.5px;
   font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .status-dot {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
   border-radius: 50%;
   background: var(--online);
+  flex-shrink: 0;
 }
 
 .status-dot.offline {
   background: var(--danger);
 }
 
-.btn-icon {
+/* Compact top-bar buttons: Report / Skip / Stop */
+.btn-header {
+  height: 30px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: filter 0.12s ease;
+}
+
+.btn-header:hover {
+  filter: brightness(1.1);
+}
+
+.btn-report {
   background: rgba(255, 92, 114, 0.1);
   border: 1px solid rgba(255, 92, 114, 0.3);
   color: var(--danger);
-  padding: 6px 10px;
-  border-radius: var(--radius-sm);
-  font-size: 12.5px;
-  cursor: pointer;
-  font-weight: 600;
+}
+
+.btn-skip {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+}
+
+.btn-stop {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+}
+
+/* Gender badge shown next to "Connected with a stranger" */
+.gender-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 5px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+
+.gender-badge.badge-male {
+  background: rgba(79, 157, 255, 0.16);
+  border: 1px solid rgba(79, 157, 255, 0.45);
+  color: #6fb2ff;
+}
+
+.gender-badge.badge-female {
+  background: rgba(255, 111, 165, 0.16);
+  border: 1px solid rgba(255, 111, 165, 0.45);
+  color: #ff8fbb;
 }
 
 .safety-strip {
@@ -486,20 +556,6 @@ body {
   cursor: not-allowed;
 }
 
-.chat-footer-actions {
-  display: flex;
-  gap: 10px;
-  padding: 12px 18px 16px;
-}
-
-.btn-next {
-  flex: 1;
-}
-
-.chat-footer-actions .btn-outline {
-  flex: 1;
-}
-
 /* ================= TOAST ================= */
 .toast {
   position: fixed;
@@ -529,12 +585,22 @@ body {
   }
 
   .chat-container {
-    height: 82vh;
+    height: 86vh;
     border-radius: var(--radius-md);
   }
 
-  .chat-footer-actions {
-    flex-direction: column;
+  .chat-header {
+    padding: 6px 8px;
+  }
+
+  .btn-header {
+    height: 28px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+
+  .chat-status {
+    font-size: 11.5px;
   }
 
   .msg {
