@@ -1,158 +1,128 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TalkStrangr — Random Anonymous Chat</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <!-- ============ TOP AD BANNER (Google AdSense slot goes here later) ============ -->
-    <div class="ad-slot ad-top" id="adTop">
-      <span class="ad-label">Advertisement</span>
-    </div>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TalkStrangr — Random Anonymous Chat</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-    <div class="app-wrapper">
-      <!-- ============ LANDING / HOME SCREEN ============ -->
-      <section id="homeScreen" class="screen home-screen">
-        <div class="home-card">
-          <div class="brand">
-            <span class="brand-dot"></span>
-            <h1>TalkStrangr</h1>
-          </div>
-          <p class="tagline">
-            Talk to a random stranger. No sign-up. No names. Just chat.
-          </p>
+<!-- ============ TOP AD BANNER (Google AdSense slot goes here later) ============ -->
+<div class="ad-slot ad-top" id="adTop">
+  <span class="ad-label">Advertisement</span>
+</div>
 
-          <div class="online-counter">
-            <span class="pulse-dot"></span>
-            <span id="onlineCountText">Connecting…</span>
-          </div>
+<div class="app-wrapper">
 
-          <div class="filter-block">
-            <label class="filter-label">You are</label>
-            <div class="chip-group" id="genderGroup">
-              <button type="button" class="chip" data-gender="male">
-                Male
-              </button>
-              <button type="button" class="chip" data-gender="female">
-                Female
-              </button>
-              <button type="button" class="chip" data-gender="other">
-                Other
-              </button>
-            </div>
+  <!-- ============ LANDING / HOME SCREEN ============ -->
+  <section id="homeScreen" class="screen home-screen">
+    <div class="home-card">
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <h1>TalkStrangr</h1>
+      </div>
+      <p class="tagline">Talk to a random stranger. No sign-up. No names. Just chat.</p>
 
-            <label class="filter-label">Connect with</label>
-            <div class="chip-group" id="lookingForGroup">
-              <button type="button" class="chip" data-lookingfor="male">
-                Male
-              </button>
-              <button type="button" class="chip" data-lookingfor="female">
-                Female
-              </button>
-              <button type="button" class="chip active" data-lookingfor="any">
-                Anyone
-              </button>
-            </div>
-          </div>
+      <div class="online-counter">
+        <span class="pulse-dot"></span>
+        <span id="onlineCountText">Connecting…</span>
+      </div>
 
-          <button id="startChatBtn" class="btn-primary">Start Chat</button>
-
-          <p class="safety-note">
-            ⚠️ Never share your phone number, address, passwords, or any
-            personal/financial details with strangers. Stay anonymous, stay
-            safe.
-          </p>
+      <div class="filter-block">
+        <label class="filter-label">You are</label>
+        <div class="chip-group" id="genderGroup">
+          <button type="button" class="chip" data-gender="male">Male</button>
+          <button type="button" class="chip" data-gender="female">Female</button>
+          <button type="button" class="chip" data-gender="other">Other</button>
         </div>
-      </section>
 
-      <!-- ============ SEARCHING SCREEN ============ -->
-      <section id="searchScreen" class="screen search-screen hidden">
-        <div class="search-card">
-          <div class="spinner"></div>
-          <p id="searchStatusText">Looking for a stranger to chat with…</p>
-
-          <div id="timeoutBox" class="timeout-box hidden">
-            <p>
-              No match found with your filter yet. Want to widen your search?
-            </p>
-            <div class="timeout-actions">
-              <button id="switchAnyoneBtn" class="btn-secondary">
-                Connect with Anyone
-              </button>
-              <button id="keepWaitingBtn" class="btn-outline">
-                Keep Waiting
-              </button>
-            </div>
-          </div>
-
-          <button id="cancelSearchBtn" class="btn-text">Cancel</button>
+        <label class="filter-label">Connect with</label>
+        <div class="chip-group" id="lookingForGroup">
+          <button type="button" class="chip" data-lookingfor="male">Male</button>
+          <button type="button" class="chip" data-lookingfor="female">Female</button>
+          <button type="button" class="chip active" data-lookingfor="any">Anyone</button>
         </div>
-      </section>
+      </div>
 
-      <!-- ============ CHAT SCREEN ============ -->
-      <section id="chatScreen" class="screen chat-screen hidden">
-        <div class="chat-container">
-          <div class="chat-header">
-            <div class="chat-header-left">
-              <span class="status-dot" id="statusDot"></span>
-              <span id="chatHeaderText">Connected with a stranger</span>
-            </div>
-            <div class="chat-header-right">
-              <button
-                id="reportBtn"
-                class="btn-icon"
-                title="Report this stranger"
-              >
-                🚩 Report
-              </button>
-            </div>
-          </div>
+      <button id="startChatBtn" class="btn-primary">Start Chat</button>
 
-          <p class="safety-strip">
-            ⚠️ Don't share personal info (phone, address, passwords, socials,
-            payment details).
-          </p>
+      <p class="safety-note">
+        ⚠️ Never share your phone number, address, passwords, or any personal/financial
+        details with strangers. Stay anonymous, stay safe.
+      </p>
+    </div>
+  </section>
 
-          <div id="messagesArea" class="messages-area"></div>
+  <!-- ============ SEARCHING SCREEN ============ -->
+  <section id="searchScreen" class="screen search-screen hidden">
+    <div class="search-card">
+      <div class="spinner"></div>
+      <p id="searchStatusText">Looking for a stranger to chat with…</p>
 
-          <div id="typingIndicator" class="typing-indicator hidden">
-            Stranger is typing…
-          </div>
-
-          <form id="messageForm" class="message-form" autocomplete="off">
-            <input
-              type="text"
-              id="messageInput"
-              class="message-input"
-              placeholder="Type a message…"
-              maxlength="1000"
-              disabled
-            />
-            <button type="submit" id="sendBtn" class="btn-send" disabled>
-              Send
-            </button>
-          </form>
-
-          <div class="chat-footer-actions">
-            <button id="nextBtn" class="btn-primary btn-next">
-              Next / Skip ▶
-            </button>
-            <button id="stopBtn" class="btn-outline">Stop Chat</button>
-          </div>
+      <div id="timeoutBox" class="timeout-box hidden">
+        <p>No match found with your filter yet. Want to widen your search?</p>
+        <div class="timeout-actions">
+          <button id="switchAnyoneBtn" class="btn-secondary">Connect with Anyone</button>
+          <button id="keepWaitingBtn" class="btn-outline">Keep Waiting</button>
         </div>
-      </section>
+      </div>
+
+      <button id="cancelSearchBtn" class="btn-text">Cancel</button>
     </div>
+  </section>
 
-    <!-- ============ BOTTOM AD BANNER (Google AdSense slot goes here later) ============ -->
-    <div class="ad-slot ad-bottom" id="adBottom">
-      <span class="ad-label">Advertisement</span>
+  <!-- ============ CHAT SCREEN ============ -->
+  <section id="chatScreen" class="screen chat-screen hidden">
+    <div class="chat-container">
+
+      <div class="chat-header">
+        <button id="reportBtn" class="btn-header btn-report" title="Report this stranger">🚩 Report</button>
+
+        <div class="chat-status">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="chatHeaderText">Connected with a stranger</span>
+          <span id="genderBadge" class="gender-badge hidden"></span>
+        </div>
+
+        <div class="chat-header-actions">
+          <button id="nextBtn" class="btn-header btn-skip" title="Skip to next stranger">Skip ➔</button>
+          <button id="stopBtn" class="btn-header btn-stop" title="Stop chat">Stop ✖</button>
+        </div>
+      </div>
+
+      <p class="safety-strip">
+        ⚠️ Don't share personal info (phone, address, passwords, socials, payment details).
+      </p>
+
+      <div id="messagesArea" class="messages-area"></div>
+
+      <div id="typingIndicator" class="typing-indicator hidden">Stranger is typing…</div>
+
+      <form id="messageForm" class="message-form" autocomplete="off">
+        <input
+          type="text"
+          id="messageInput"
+          class="message-input"
+          placeholder="Type a message…"
+          maxlength="1000"
+          disabled
+        />
+        <button type="submit" id="sendBtn" class="btn-send" disabled>Send</button>
+      </form>
     </div>
+  </section>
 
-    <div id="toast" class="toast hidden"></div>
+</div>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="client.js"></script>
-  </body>
+<!-- ============ BOTTOM AD BANNER (Google AdSense slot goes here later) ============ -->
+<div class="ad-slot ad-bottom" id="adBottom">
+  <span class="ad-label">Advertisement</span>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="client.js"></script>
+</body>
 </html>
