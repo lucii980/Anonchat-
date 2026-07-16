@@ -1,213 +1,337 @@
+// server.js
+// Complete backend server for the random text chat website.
+// Run with: node server.js
+
 const express = require('express');
 const http = require('http');
-const { Server } = require('socket.io');
-const crypto = require('crypto');
 const path = require('path');
+const { Server } = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
+const io = new Server(server);
 
-// Serve frontend static files
+const PORT = process.env.PORT || 3000;
+
+// Serve the frontend files from the "public" folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-const io = new Server(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST'],
-    credentials: false
-  },
-  maxHttpBufferSize: 5 * 1024 * 1024,
-  pingTimeout: 60000,
-  pingInterval: 25000
-});
+// ---------------------------------------------------------------------------
+// SAFETY: Bad word filter (static list). Add/remove words here as needed.
+// ---------------------------------------------------------------------------
+const BAD_WORDS = [
+  'fuck', 'fucking', 'fucker', 'shit', 'bitch', 'asshole', 'bastard',
+  'dick', 'pussy', 'cunt', 'whore', 'slut', 'randi', 'chutiya', 'madarchod',
+  'behenchod', 'bhosdi', 'bhenchod', 'gandu', 'lund', 'chod', 'harami',
+  'saala kutta', 'porn', 'sex chat', 'nudes'
+];
 
-// Health check
-app.get('/', (req, res) => res.json({ status: 'AnonChat backend running' }));
-app.get('/health', (req, res) => res.json({ status: 'ok', users: waitingUsers.size + connectedPairs.size / 2 }));
-
-// Waiting queues by preference
-const waitingQueues = { male:[], female:[], other:[], any:[] };
-const connectedPairs = new Map();
-const userInfo = new Map();
-const waitingUsers = new Set();
-
-function generateRoomKey() {
-  return crypto.randomBytes(16).toString('hex');
+function filterBadWords(message) {
+  let filtered = message;
+  BAD_WORDS.forEach((word) => {
+    const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp('\\b' + escaped + '\\b', 'gi');
+    filtered = filtered.replace(regex, (match) => '*'.repeat(match.length));
+  });
+  return filtered;
 }
 
-function tryMatch(socket) {
-  const user = userInfo.get(socket.id);
-  if (!user) return;
+// ---------------------------------------------------------------------------
+// SAFETY: Link prevention. Blocks messages containing URLs / domains.
+// ---------------------------------------------------------------------------
+const LINK_REGEX = /(https?:\/\/|www\.|\b[a-z0-9-]+\.(com|net|org|in|io|co|xyz|me|link|info|biz)\b)/i;
 
-  const { pref, gender, country } = user;
-  let partnerSocket = null;
+function containsLink(message) {
+  return LINK_REGEX.test(message);
+}
 
-  const searchQueues = pref === 'any'
-    ? ['male', 'female', 'other', 'any']
-    : [pref, 'any'];
+// ---------------------------------------------------------------------------
+// In-memory state
+// ---------------------------------------------------------------------------
 
-  // First try: match by country too
-  for (const q of searchQueues) {
-    const queue = waitingQueues[q];
-    for (let i = 0; i < queue.length; i++) {
-      const candidate = queue[i];
-      if (candidate.id === socket.id) continue;
-      const candidateInfo = userInfo.get(candidate.id);
-      if (!candidateInfo) continue;
+// All currently connected sockets -> user state
+// userState: { socketId, clientId, gender, lookingFor, status, partnerId, waitTimer }
+const users = new Map();
 
-      const candidateWantsUs = candidateInfo.pref === 'any' || candidateInfo.pref === gender;
-      const countryMatch = country === 'any' || candidateInfo.country === 'any' || candidateInfo.country === country;
+// Users currently waiting to be matched
+let waitingQueue = [];
 
-      if (candidateWantsUs && countryMatch) {
-        partnerSocket = candidate;
-        queue.splice(i, 1);
-        waitingUsers.delete(candidate.id);
-        break;
-      }
-    }
-    if (partnerSocket) break;
-  }
+// Reported pairs, so two clientIds that had a report between them never match again.
+// Stored as a Set of "clientIdA|clientIdB" (sorted alphabetically).
+const blockedPairs = new Set();
 
-  // Fallback: ignore country filter if no match found after 10s
-  if (!partnerSocket && country !== 'any') {
-    for (const q of searchQueues) {
-      const queue = waitingQueues[q];
-      for (let i = 0; i < queue.length; i++) {
-        const candidate = queue[i];
-        if (candidate.id === socket.id) continue;
-        const candidateInfo = userInfo.get(candidate.id);
-        if (!candidateInfo) continue;
-        const candidateWantsUs = candidateInfo.pref === 'any' || candidateInfo.pref === gender;
-        if (candidateWantsUs) {
-          partnerSocket = candidate;
-          queue.splice(i, 1);
-          waitingUsers.delete(candidate.id);
-          break;
-        }
-      }
-      if (partnerSocket) break;
-    }
-  }
+function pairKey(clientIdA, clientIdB) {
+  return [clientIdA, clientIdB].sort().join('|');
+}
 
-  if (partnerSocket) {
-    removeFromQueues(socket.id);
-    waitingUsers.delete(socket.id);
+function isBlockedPair(clientIdA, clientIdB) {
+  return blockedPairs.has(pairKey(clientIdA, clientIdB));
+}
 
-    const sharedKey = generateRoomKey();
-    connectedPairs.set(socket.id, partnerSocket.id);
-    connectedPairs.set(partnerSocket.id, socket.id);
+function broadcastOnlineCount() {
+  io.emit('onlineCount', users.size);
+}
 
-    const partnerInfo = userInfo.get(partnerSocket.id);
-
-    socket.emit('matched', {
-      partnerNick: partnerInfo.nick,
-      partnerGender: partnerInfo.gender,
-      partnerCountry: partnerInfo.country,
-      sharedKey
-    });
-
-    partnerSocket.emit('matched', {
-      partnerNick: user.nick,
-      partnerGender: user.gender,
-      partnerCountry: user.country,
-      sharedKey
-    });
-
-    console.log(`✅ Matched: ${user.nick}(${gender}/${country}) ↔ ${partnerInfo.nick}(${partnerInfo.gender}/${partnerInfo.country})`);
-  } else {
-    const myQueue = pref === 'any' ? 'any' : pref;
-    waitingQueues[myQueue].push(socket);
-    waitingUsers.add(socket.id);
-    socket.emit('waiting', { position: waitingUsers.size });
-    console.log(`⏳ Waiting: ${user.nick} (pref:${pref}, gender:${gender}, country:${country})`);
+function clearWaitTimer(state) {
+  if (state && state.waitTimer) {
+    clearTimeout(state.waitTimer);
+    state.waitTimer = null;
   }
 }
 
-function removeFromQueues(socketId) {
-  for (const q of Object.values(waitingQueues)) {
-    const idx = q.findIndex(s => s.id === socketId);
-    if (idx !== -1) q.splice(idx, 1);
+function removeFromQueue(socketId) {
+  waitingQueue = waitingQueue.filter((s) => s !== socketId);
+}
+
+// Checks compatibility between two waiting users' preferences.
+function isCompatible(a, b) {
+  const aWantsB = a.lookingFor === 'any' || a.lookingFor === b.gender;
+  const bWantsA = b.lookingFor === 'any' || b.lookingFor === a.gender;
+  return aWantsB && bWantsA;
+}
+
+// Attempts to find a match for the given socket id inside the waiting queue.
+function tryMatch(socketId) {
+  const state = users.get(socketId);
+  if (!state || state.status !== 'waiting') return;
+
+  for (let i = 0; i < waitingQueue.length; i++) {
+    const otherId = waitingQueue[i];
+    if (otherId === socketId) continue;
+
+    const otherState = users.get(otherId);
+    if (!otherState || otherState.status !== 'waiting') continue;
+
+    if (isBlockedPair(state.clientId, otherState.clientId)) continue;
+
+    if (isCompatible(state, otherState)) {
+      // Found a match — remove both from the queue
+      removeFromQueue(socketId);
+      removeFromQueue(otherId);
+      clearWaitTimer(state);
+      clearWaitTimer(otherState);
+
+      state.status = 'chatting';
+      otherState.status = 'chatting';
+      state.partnerId = otherId;
+      otherState.partnerId = socketId;
+
+      io.to(socketId).emit('matched', { partnerGender: otherState.gender });
+      io.to(otherId).emit('matched', { partnerGender: state.gender });
+      return true;
+    }
+  }
+  return false;
+}
+
+// Puts a user into the waiting queue and starts the 20s "no match" timer.
+function enqueueUser(socketId) {
+  const state = users.get(socketId);
+  if (!state) return;
+
+  state.status = 'waiting';
+  state.partnerId = null;
+  if (!waitingQueue.includes(socketId)) {
+    waitingQueue.push(socketId);
+  }
+
+  const matched = tryMatch(socketId);
+  if (matched) return;
+
+  clearWaitTimer(state);
+  state.waitTimer = setTimeout(() => {
+    const current = users.get(socketId);
+    if (current && current.status === 'waiting') {
+      io.to(socketId).emit('noMatchTimeout');
+    }
+  }, 20000);
+}
+
+// Ends the current chat session for a socket, notifying the partner.
+function endChat(socketId, { notifyPartner = true, reason = 'left' } = {}) {
+  const state = users.get(socketId);
+  if (!state) return;
+
+  const partnerId = state.partnerId;
+  state.partnerId = null;
+  state.status = 'idle';
+  clearWaitTimer(state);
+  removeFromQueue(socketId);
+
+  if (partnerId) {
+    const partnerState = users.get(partnerId);
+    if (partnerState) {
+      partnerState.partnerId = null;
+      partnerState.status = 'idle';
+      if (notifyPartner) {
+        io.to(partnerId).emit('partnerLeft', { reason });
+      }
+    }
   }
 }
 
 io.on('connection', (socket) => {
-  console.log(`🔌 Connected: ${socket.id}`);
+  // Client must send its persistent clientId (generated & stored in browser localStorage)
+  // right after connecting via the 'register' event.
+  socket.on('register', (clientId) => {
+    const safeClientId = (typeof clientId === 'string' && clientId.length > 0)
+      ? clientId.slice(0, 100)
+      : socket.id;
 
-  socket.on('findPartner', ({ nick, gender, pref, country }) => {
-    const safeNick = String(nick || 'Anonymous').slice(0, 20).replace(/[<>]/g, '');
-    const safeGender = ['male', 'female', 'other'].includes(gender) ? gender : 'other';
-    const safePref = ['male', 'female', 'other', 'any'].includes(pref) ? pref : 'any';
-    const safeCountry = String(country || 'any').slice(0, 10);
-
-    userInfo.set(socket.id, { nick: safeNick, gender: safeGender, pref: safePref, country: safeCountry });
-    tryMatch(socket);
-  });
-
-  socket.on('cancelSearch', () => {
-    removeFromQueues(socket.id);
-    waitingUsers.delete(socket.id);
-  });
-
-  socket.on('sendMessage', ({ text, encryptedText }) => {
-    const partnerId = connectedPairs.get(socket.id);
-    if (!partnerId) return;
-    const partnerSocket = io.sockets.sockets.get(partnerId);
-    if (!partnerSocket) return;
-    const user = userInfo.get(socket.id);
-    partnerSocket.emit('receiveMessage', {
-      text: encryptedText || text,
-      senderNick: user?.nick || 'Stranger',
-      timestamp: Date.now()
+    users.set(socket.id, {
+      socketId: socket.id,
+      clientId: safeClientId,
+      gender: null,
+      lookingFor: null,
+      status: 'idle',
+      partnerId: null,
+      waitTimer: null,
     });
+
+    broadcastOnlineCount();
   });
 
-  socket.on('sendImage', ({ imageData }) => {
-    const partnerId = connectedPairs.get(socket.id);
-    if (!partnerId) return;
-    const partnerSocket = io.sockets.sockets.get(partnerId);
-    if (!partnerSocket) return;
-    if (!imageData || !imageData.startsWith('data:image/')) return;
-    const user = userInfo.get(socket.id);
-    partnerSocket.emit('receiveImage', {
-      imageData,
-      senderNick: user?.nick || 'Stranger',
-      timestamp: Date.now()
-    });
+  socket.on('findPartner', (payload) => {
+    const state = users.get(socket.id);
+    if (!state) return;
+
+    const gender = ['male', 'female', 'other'].includes(payload && payload.gender)
+      ? payload.gender
+      : 'other';
+    const lookingFor = ['male', 'female', 'any'].includes(payload && payload.lookingFor)
+      ? payload.lookingFor
+      : 'any';
+
+    // If already chatting, end that first
+    if (state.status === 'chatting') {
+      endChat(socket.id, { notifyPartner: true, reason: 'skipped' });
+    }
+
+    state.gender = gender;
+    state.lookingFor = lookingFor;
+
+    enqueueUser(socket.id);
+  });
+
+  // User agrees to widen their filter to "Anyone" after the 20s timeout.
+  socket.on('switchToAnyone', () => {
+    const state = users.get(socket.id);
+    if (!state || state.status !== 'waiting') return;
+    state.lookingFor = 'any';
+    tryMatch(socket.id);
+  });
+
+  // User chooses to keep waiting with the same filter for another cycle.
+  socket.on('keepWaiting', () => {
+    const state = users.get(socket.id);
+    if (!state || state.status !== 'waiting') return;
+    clearWaitTimer(state);
+    state.waitTimer = setTimeout(() => {
+      const current = users.get(socket.id);
+      if (current && current.status === 'waiting') {
+        io.to(socket.id).emit('noMatchTimeout');
+      }
+    }, 20000);
+  });
+
+  socket.on('chatMessage', (rawMessage) => {
+    const state = users.get(socket.id);
+    if (!state || state.status !== 'chatting' || !state.partnerId) return;
+
+    if (typeof rawMessage !== 'string') return;
+    const trimmed = rawMessage.trim().slice(0, 1000);
+    if (trimmed.length === 0) return;
+
+    if (containsLink(trimmed)) {
+      socket.emit('systemNotice', 'Links are not allowed in chat. Your message was not sent.');
+      return;
+    }
+
+    const cleanMessage = filterBadWords(trimmed);
+
+    io.to(state.partnerId).emit('chatMessage', { text: cleanMessage, from: 'stranger' });
+    socket.emit('chatMessage', { text: cleanMessage, from: 'me' });
   });
 
   socket.on('typing', (isTyping) => {
-    const partnerId = connectedPairs.get(socket.id);
-    if (!partnerId) return;
-    const partnerSocket = io.sockets.sockets.get(partnerId);
-    if (partnerSocket) partnerSocket.emit('partnerTyping', isTyping);
+    const state = users.get(socket.id);
+    if (!state || state.status !== 'chatting' || !state.partnerId) return;
+    io.to(state.partnerId).emit('typing', !!isTyping);
   });
 
   socket.on('skip', () => {
-    handleDisconnectFromPair(socket);
-    const user = userInfo.get(socket.id);
-    if (user) tryMatch(socket);
+    const state = users.get(socket.id);
+    if (!state) return;
+
+    if (state.status === 'chatting') {
+      endChat(socket.id, { notifyPartner: true, reason: 'skipped' });
+    } else {
+      clearWaitTimer(state);
+      removeFromQueue(socket.id);
+      state.status = 'idle';
+    }
+  });
+
+  socket.on('rejoinQueue', (payload) => {
+    const state = users.get(socket.id);
+    if (!state) return;
+
+    const gender = ['male', 'female', 'other'].includes(payload && payload.gender)
+      ? payload.gender
+      : state.gender || 'other';
+    const lookingFor = ['male', 'female', 'any'].includes(payload && payload.lookingFor)
+      ? payload.lookingFor
+      : state.lookingFor || 'any';
+
+    state.gender = gender;
+    state.lookingFor = lookingFor;
+    enqueueUser(socket.id);
+  });
+
+  socket.on('report', () => {
+    const state = users.get(socket.id);
+    if (!state || !state.partnerId) return;
+
+    const partnerState = users.get(state.partnerId);
+    if (partnerState) {
+      blockedPairs.add(pairKey(state.clientId, partnerState.clientId));
+    }
+
+    socket.emit('systemNotice', 'Stranger has been reported. You will not be matched with them again.');
+    endChat(socket.id, { notifyPartner: true, reason: 'reported' });
+  });
+
+  socket.on('leaveChat', () => {
+    const state = users.get(socket.id);
+    if (!state) return;
+    if (state.status === 'chatting') {
+      endChat(socket.id, { notifyPartner: true, reason: 'left' });
+    } else {
+      clearWaitTimer(state);
+      removeFromQueue(socket.id);
+      state.status = 'idle';
+    }
   });
 
   socket.on('disconnect', () => {
-    handleDisconnectFromPair(socket);
-    removeFromQueues(socket.id);
-    waitingUsers.delete(socket.id);
-    userInfo.delete(socket.id);
-    console.log(`🔴 Disconnected: ${socket.id}`);
+    const state = users.get(socket.id);
+    if (state) {
+      clearWaitTimer(state);
+      removeFromQueue(socket.id);
+      if (state.status === 'chatting' && state.partnerId) {
+        const partnerState = users.get(state.partnerId);
+        if (partnerState) {
+          partnerState.partnerId = null;
+          partnerState.status = 'idle';
+          io.to(state.partnerId).emit('partnerLeft', { reason: 'disconnected' });
+        }
+      }
+    }
+    users.delete(socket.id);
+    broadcastOnlineCount();
   });
 });
 
-function handleDisconnectFromPair(socket) {
-  const partnerId = connectedPairs.get(socket.id);
-  if (partnerId) {
-    const partnerSocket = io.sockets.sockets.get(partnerId);
-    if (partnerSocket) partnerSocket.emit('partnerLeft');
-    connectedPairs.delete(socket.id);
-    connectedPairs.delete(partnerId);
-  }
-}
-
-const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`🚀 AnonChat Server running on http://localhost:${PORT}`);
+  console.log(`Random Chat server running on http://localhost:${PORT}`);
 });
