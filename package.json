@@ -1,20 +1,13 @@
 {
-  "name": "anonchat",
+  "name": "random-text-chat",
   "version": "1.0.0",
-  "description": "Anonymous real-time chat app",
+  "description": "Single-page anonymous random text chat website with gender filter and safety filters.",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "socket.io": "^4.7.2"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
-  },
-  "engines": {
-    "node": ">=16.0.0"
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
   }
 }
