@@ -77,17 +77,23 @@
     <div class="chat-container">
 
       <div class="chat-header">
-        <button id="reportBtn" class="btn-header btn-report" title="Report this stranger">🚩 Report</button>
+        <button id="reportBtn" class="btn-header btn-report" title="Report this stranger">
+          <span class="btn-icon">🚩</span><span class="btn-label">Report</span>
+        </button>
 
         <div class="chat-status">
           <span class="status-dot" id="statusDot"></span>
-          <span id="chatHeaderText">Connected with </span>
+          <span class="status-text" id="chatHeaderText">Connected with a stranger</span>
           <span id="genderBadge" class="gender-badge hidden"></span>
         </div>
 
         <div class="chat-header-actions">
-          <button id="nextBtn" class="btn-header btn-skip" title="Skip to next stranger">Skip ➔</button>
-          <button id="stopBtn" class="btn-header btn-stop" title="Stop chat">Stop ✖</button>
+          <button id="nextBtn" class="btn-header btn-skip" title="Skip to next stranger">
+            <span class="btn-label">Skip</span><span class="btn-icon">➔</span>
+          </button>
+          <button id="stopBtn" class="btn-header btn-stop" title="Stop chat">
+            <span class="btn-label">Stop</span><span class="btn-icon">✖</span>
+          </button>
         </div>
       </div>
 
